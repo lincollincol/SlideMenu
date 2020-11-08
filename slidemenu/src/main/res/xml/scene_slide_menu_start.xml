@@ -2,6 +2,117 @@
 <MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+    <!--TODO: resize drag view to content sizes-->
+
+    <Transition
+        app:constraintSetStart="@id/weatherElapsed"
+        app:constraintSetEnd="@id/weatherCollapsed"
+        app:duration="300">
+
+        <OnSwipe
+            app:onTouchUp="autoComplete"
+            app:dragDirection="dragStart"
+            app:touchRegionId="@id/dragView"
+            app:touchAnchorId="@id/dragView"/>
+
+    </Transition>
+
+    <ConstraintSet
+        android:id="@+id/weatherElapsed">
+
+        <Constraint
+            android:id="@+id/dragView"
+            android:layout_width="200dp"
+            android:layout_height="300dp"
+            android:elevation="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <Constraint
+            android:id="@+id/contentFragment">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+            <Transform
+                android:scaleX="1"
+                android:scaleY="1"
+                android:rotationY="0"/>
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/shadowMock">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+            <Transform
+                android:scaleX="1"
+                android:scaleY="1"
+                android:rotationY="0"/>
+        </Constraint>
+
+    </ConstraintSet>
+
+    <ConstraintSet
+        android:id="@+id/weatherCollapsed"
+        app:deriveConstraintsFrom="@+id/weatherElapsed">
+        <Constraint
+            android:id="@+id/dragView"
+            android:layout_width="200dp"
+            android:layout_height="300dp"
+            android:elevation="25dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <Constraint
+            android:id="@+id/contentFragment">
+            <Layout
+                app:layout_constraintWidth_percent="0.99"
+                app:layout_constraintHeight_percent="0.99"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+            <Transform
+                android:scaleX="0.7"
+                android:scaleY="0.7"
+                android:rotationY="-10"/>
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/shadowMock">
+            <Layout
+                app:layout_constraintWidth_percent="0.99"
+                app:layout_constraintHeight_percent="0.99"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+            <Transform
+                android:scaleX="0.7"
+                android:scaleY="0.7"
+                android:rotationY="-10"/>
+        </Constraint>
+
+    </ConstraintSet>
+
+</MotionScene>
+
+<!--
+
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <Transition
         app:constraintSetStart="@id/weatherElapsed"
         app:constraintSetEnd="@id/weatherCollapsed"
@@ -58,7 +169,6 @@
 
         <Constraint
             android:id="@+id/contentFragment">
-<!--            android:layout_height="0dp"-->
             <Layout
                 app:layout_constraintWidth_percent="0.99"
                 app:layout_constraintHeight_percent="0.99"
@@ -69,136 +179,8 @@
             <Transform
                 android:scaleX="0.7"
                 android:scaleY="0.7"
-                android:rotationY="-10"/> <!--Rotate-->
+                android:rotationY="-10"/>
         </Constraint>
-
-    </ConstraintSet>
-
-</MotionScene>
-
-<!--
-
-<?xml version="1.0" encoding="utf-8"?>
-<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <Transition
-        app:constraintSetStart="@id/weatherElapsed"
-        app:constraintSetEnd="@id/weatherCollapsed"
-        app:duration="300">
-
-        <OnSwipe
-            app:onTouchUp="autoComplete"
-            app:dragDirection="dragStart"
-            app:touchRegionId="@id/dragView"
-            app:touchAnchorId="@id/dragView"/>
-
-    </Transition>
-
-    <ConstraintSet
-        android:id="@+id/weatherElapsed">
-
-        <Constraint
-            android:id="@+id/dragView"
-            android:layout_width="200dp"
-            android:layout_height="300dp"
-            android:elevation="15dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <Constraint
-            android:id="@+id/contentFragment"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:elevation="0dp"
-            app:layout_constraintTop_toTopOf="@id/contentHorizontalTopLine"
-            app:layout_constraintBottom_toBottomOf="@id/contentHorizontalBottomLine"
-            app:layout_constraintStart_toStartOf="@id/contentVerticalStartLine"
-            app:layout_constraintEnd_toEndOf="@id/contentVerticalEndLine"/>
-
-        <Constraint
-            android:id="@+id/contentHorizontalTopLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0"/>
-
-        <Constraint
-            android:id="@+id/contentHorizontalBottomLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="1"/>
-
-        <Constraint
-            android:id="@+id/contentVerticalStartLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0"/>
-
-        <Constraint
-            android:id="@+id/contentVerticalEndLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="1"/>
-
-    </ConstraintSet>
-
-
-    <ConstraintSet
-        android:id="@+id/weatherCollapsed"
-        app:deriveConstraintsFrom="@+id/weatherElapsed">
-
-
-        <Constraint
-            android:id="@+id/dragView"
-            android:layout_width="200dp"
-            android:layout_height="300dp"
-            android:elevation="25dp"
-            app:layout_constraintTop_toTopOf="@id/contentHorizontalTopLine"
-            app:layout_constraintBottom_toBottomOf="@id/contentHorizontalBottomLine"
-            app:layout_constraintStart_toStartOf="@id/contentVerticalStartLine"
-            app:layout_constraintEnd_toEndOf="@id/contentVerticalEndLine"/>
-
-        <Constraint
-            android:id="@+id/contentFragment"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:elevation="15dp"
-            app:layout_constraintTop_toTopOf="@id/contentHorizontalTopLine"
-            app:layout_constraintBottom_toBottomOf="@id/contentHorizontalBottomLine"
-            app:layout_constraintStart_toStartOf="@id/contentVerticalStartLine"
-            app:layout_constraintEnd_toEndOf="@id/contentVerticalEndLine"/>
-
-        <Constraint
-            android:id="@+id/contentHorizontalTopLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.1"/>
-
-        <Constraint
-            android:id="@+id/contentHorizontalBottomLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.9"/>
-
-        <Constraint
-            android:id="@+id/contentVerticalStartLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5"/>
-
-        <Constraint
-            android:id="@+id/contentVerticalEndLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="1"/>
 
     </ConstraintSet>
 

@@ -2,10 +2,10 @@ package linc.com.slidemenu
 
 import android.content.Context
 import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import linc.com.slidemenu.util.MotionConnector
 import linc.com.slidemenu.util.Constants.ALPHA
 import linc.com.slidemenu.util.Constants.RADIUS
 import linc.com.slidemenu.util.Menu
@@ -44,6 +44,7 @@ open class SlideMenu private constructor(
         // TODO: 06.11.20 rebuild layout markup according to menu side
 
         // TODO: 07.11.20 check for class cast exceptions
+
         // Start content fragment
         (context as FragmentActivity).supportFragmentManager
             .beginTransaction()
@@ -52,7 +53,7 @@ open class SlideMenu private constructor(
             .commit()
 
         rebuildLayout()
-        rebuildScene()
+        applyCustomMenuParameters()
 
     }
 
@@ -67,34 +68,76 @@ open class SlideMenu private constructor(
         }
 
         val contentView = (context as FragmentActivity).findViewById<MotionLayout>(R.id.motionLayout)
-
+        MotionConnector.setParentLayout(contentView)
         when(side) {
             MenuSide.START -> {
-                val constraintLayout: ConstraintLayout = contentView
-                val constraintSet = ConstraintSet()
-                constraintSet.clone(constraintLayout)
-                constraintSet.connect(
-                    R.id.dragStart,
-                    ConstraintSet.START,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.START
-                )
-                constraintSet.clear(R.id.dragStart, ConstraintSet.END)
-                constraintSet.applyTo(constraintLayout)
+                // Elapsed
+                MotionConnector.setConstraintSet(R.id.weatherElapsed)
+
+                // Drag view
+                MotionConnector.clearConnections(R.id.dragView)
+                MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
+                MotionConnector.startToStartOf(R.id.dragView, ConstraintSet.PARENT_ID)
+
+                // Collapsed
+                MotionConnector.setConstraintSet(R.id.weatherCollapsed)
+
+                // Drag view
+                MotionConnector.clearConnections(R.id.dragView)
+                MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
+                MotionConnector.startToEndOf(R.id.dragView, ConstraintSet.PARENT_ID)
+                MotionConnector.endToEndOf(R.id.dragView, ConstraintSet.PARENT_ID)
+
+                // Content view
+                MotionConnector.clearConnections(R.id.contentFragment)
+                MotionConnector.topToTopOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.bottomToBottomOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.startToEndOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.endToEndOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+
+                // Shadow view
+                MotionConnector.clearConnections(R.id.shadowMock)
+                MotionConnector.topToTopOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.bottomToBottomOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.startToEndOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.endToEndOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
             }
             MenuSide.END -> {
-                val constraintLayout: ConstraintLayout = contentView
-                val constraintSet = ConstraintSet()
-                constraintSet.connect(
-                    R.id.dragStart,
-                    ConstraintSet.START,
-                    ConstraintSet.PARENT_ID,
-                    ConstraintSet.START
-                )
-                constraintSet.clear(R.id.dragStart, ConstraintSet.END)
-                constraintSet.applyTo(constraintLayout)
+                // Elapsed
+                MotionConnector.setConstraintSet(R.id.weatherElapsed)
+
+                // Drag view
+                MotionConnector.clearConnections(R.id.dragView)
+                MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
+                MotionConnector.endToEndOf(R.id.dragView, ConstraintSet.PARENT_ID)
+
+                // Collapsed
+                MotionConnector.setConstraintSet(R.id.weatherCollapsed)
+
+                // Drag view
+                MotionConnector.clearConnections(R.id.dragView)
+                MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
+                MotionConnector.startToStartOf(R.id.dragView, ConstraintSet.PARENT_ID)
+                MotionConnector.endToStartOf(R.id.dragView, ConstraintSet.PARENT_ID)
+
+                // Content view
+                MotionConnector.clearConnections(R.id.contentFragment)
+                MotionConnector.topToTopOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.bottomToBottomOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.startToStartOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.endToStartOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
+
+                // Shadow view
+                MotionConnector.clearConnections(R.id.shadowMock)
+                MotionConnector.topToTopOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.bottomToBottomOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.startToStartOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.endToStartOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+
             }
-            MenuSide.BOTTOM -> {}
+            MenuSide.BOTTOM -> {
+                println("BOTTOM")
+            }
         }
     }
 
@@ -106,7 +149,7 @@ open class SlideMenu private constructor(
     /**
      * Scene rebuild
      * */
-    private fun rebuildScene() {
+    private fun applyCustomMenuParameters() {
         val contentView = (context as FragmentActivity).findViewById<MotionLayout>(R.id.motionLayout)
         contentView.getConstraintSet(R.id.weatherElapsed)
             .let {
@@ -135,6 +178,11 @@ open class SlideMenu private constructor(
     }
 
     class Builder {
+
+        // TODO: 08.11.20 disable drag view
+        // TODO: 08.11.20 add menu controller (open/close) view
+        // TODO: 08.11.20 highlight drag view
+        // TODO: 08.11.20 subscribe for animation progress method like listener
 
         // TODO: 06.11.20 add drag view width and height percentage
 
@@ -181,9 +229,6 @@ open class SlideMenu private constructor(
 
         fun setContentCollapsedHeight(heightPercent: Float): Builder {
             this.heightPercent = heightPercent
-            // res = 100 - heightPercent
-            // oneSide = res / 2
-            // set bottom and tom to one side
             return this@Builder
         }
 

@@ -1,15 +1,16 @@
 package linc.com.slidemenu
 
 import android.content.Context
-import android.view.View
-import android.view.ViewGroup
+import android.graphics.Color
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import linc.com.slidemenu.util.MotionConnector
 import linc.com.slidemenu.util.Constants.ALPHA
+import linc.com.slidemenu.util.Constants.BACKGROUND_COLOR
+import linc.com.slidemenu.util.Constants.CARD_COLOR
+import linc.com.slidemenu.util.Constants.CARD_ELEVATION
 import linc.com.slidemenu.util.Constants.RADIUS
 import linc.com.slidemenu.util.Menu
 import linc.com.slidemenu.util.MenuSide
@@ -23,12 +24,16 @@ open class SlideMenu private constructor(
     private val shadow: Shadow,
     private val dragWidthPercent: Float,
     private val dragHeightPercent: Float,
+    private var elevation: Float,
     private val opacity: Float,
     private val radius: Float,
     private val degreeHorizontal: Float,
     private val degreeVertical: Float,
     private val degreeAround: Float,
-    private val menuTemplate: Menu?
+    private val menuTemplate: Menu?,
+    // Debug params
+    private var highLightDrag: Boolean
+
 ) {
 
     // TODO: 06.11.20 footer
@@ -42,6 +47,8 @@ open class SlideMenu private constructor(
     * . . .
     */
 
+    private var parentMotionLayout: MotionLayout
+
     init {
 
         // TODO: 07.11.20 check for class cast exceptions
@@ -53,23 +60,26 @@ open class SlideMenu private constructor(
             .replace(R.id.contentFragment, fragment)
             .commit()
 
+        parentMotionLayout = context.findViewById(R.id.motionLayout)
+
+        // Init MotionConnector
+        MotionConnector.setParentLayout(parentMotionLayout)
+
+        // Apply external customization
         rebuildLayout()
         applyCustomMenuParameters()
-
     }
 
     /**
      * Layout rebuild
      * */
     private fun rebuildLayout() {
-        //
+        // Rebuild layout form template
         if(menuTemplate != null) {
             rebuildLayoutFromTemplate()
             return
         }
 
-        val contentView = (context as FragmentActivity).findViewById<MotionLayout>(R.id.motionLayout)
-        MotionConnector.setParentLayout(contentView)
         when(side) {
             MenuSide.START -> {
                 // Elapsed
@@ -127,7 +137,7 @@ open class SlideMenu private constructor(
 
             }
             MenuSide.BOTTOM -> {
-                println("BOTTOM")
+                // TODO: 10.11.20 create bottom menu
             }
         }
     }
@@ -138,53 +148,76 @@ open class SlideMenu private constructor(
     }
 
     /**
-     * Scene rebuild
-     * */
+     * Layout customization
+     */
     private fun applyCustomMenuParameters() {
-        val contentView = (context as FragmentActivity).findViewById<MotionLayout>(R.id.motionLayout)
+        // Drag view layout params
+        applyDragCustomization()
 
-        contentView.getConstraintSet(R.id.weatherElapsed)
+        // Content view layout params
+        applyMenuCustomization(R.id.contentFragment)
+
+        // Shadow view layout params
+        applyMenuCustomization(R.id.shadowMock)
+
+        // Shadow customization
+        applyShadowCustomization()
+    }
+
+
+    private fun applyDragCustomization() {
+        parentMotionLayout.getConstraintSet(R.id.weatherElapsed)
             .let {
-                // Drag view
                 it.constrainPercentHeight(R.id.dragView, dragHeightPercent)
                 it.constrainPercentWidth(R.id.dragView, dragWidthPercent)
-
-                it.setFloatValue(R.id.contentFragment, RADIUS, 0f)
-                it.setFloatValue(R.id.contentFragment, ALPHA, 1f)
-
-                // Shadow
-                it.setFloatValue(R.id.shadowMock, RADIUS, 0f)
-                it.setFloatValue(R.id.shadowMock, ALPHA, 0f)
+                if(highLightDrag) {
+                    it.setIntValue(R.id.dragView, BACKGROUND_COLOR, Color.RED)
+                    it.setFloatValue(R.id.dragView, ALPHA, 0.3f)
+                }
             }
-
-        contentView.getConstraintSet(R.id.weatherCollapsed)
+        parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
-                // Drag view
-
-                // Content fragment
-                it.setRotationY(R.id.contentFragment, 0f) // rotation horizontal
-                it.setRotation(R.id.contentFragment, 0f) // rotate around center
-                it.setFloatValue(R.id.contentFragment, RADIUS, 100f)
-                it.setFloatValue(R.id.contentFragment, ALPHA, 0.2f)
-
-                // Shadow
-                it.setRotationY(R.id.shadowMock, 0f) // rotation horizontal
-                it.setRotation(R.id.shadowMock, 0f) // rotate around center
-                it.setFloatValue(R.id.shadowMock, RADIUS, 100f)
-                it.setFloatValue(R.id.shadowMock, ALPHA, 0.5f)
+                if(highLightDrag) {
+                    it.setIntValue(R.id.dragView, BACKGROUND_COLOR, Color.RED)
+                    it.setFloatValue(R.id.dragView, ALPHA, 0.3f)
+                }
             }
+    }
 
+    private fun applyMenuCustomization(viewId: Int) {
+        parentMotionLayout.getConstraintSet(R.id.weatherElapsed)
+            .let {
+                it.setFloatValue(viewId, CARD_ELEVATION, 1f)
+            }
+        parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
+            .let {
+                it.setRotationY(viewId, degreeHorizontal)
+                it.setRotationX(viewId, degreeVertical)
+                it.setRotation(viewId, degreeAround) // rotate around center
+                it.setFloatValue(viewId, RADIUS, radius)
+                it.setFloatValue(viewId, ALPHA, opacity)
+                it.setFloatValue(viewId, CARD_ELEVATION, elevation)
+            }
+    }
+
+    private fun applyShadowCustomization() {
+        parentMotionLayout.getConstraintSet(R.id.weatherElapsed)
+            .let {
+                it.setFloatValue(R.id.shadowMock, ALPHA, 0f)
+                it.setIntValue(R.id.shadowMock, CARD_COLOR, shadow.color)
+            }
+        parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
+            .let {
+                it.setFloatValue(R.id.shadowMock, ALPHA, shadow.opacity)
+                it.setIntValue(R.id.shadowMock, CARD_COLOR, shadow.color)
+            }
     }
 
     class Builder {
 
         // TODO: 08.11.20 disable drag view
         // TODO: 08.11.20 add menu controller (open/close) view
-        // TODO: 08.11.20 highlight drag view
         // TODO: 08.11.20 subscribe for animation progress method like listener
-
-        // TODO: 06.11.20 add drag view width and height percentage
-
         // TODO: 07.11.20 handle Class errors in the future
 
         private lateinit var context: Context
@@ -193,12 +226,19 @@ open class SlideMenu private constructor(
         private var shadow: Shadow = Shadow.getDefault()
         private var dragWidthPercent: Float = 0.25f
         private var dragHeightPercent: Float = 0.4f
+        private var elevation: Float = 10f
         private var opacity: Float = 1f
         private var radius: Float = 0f
         private var degreeHorizontal: Float = 0f
         private var degreeVertical: Float = 0f
         private var degreeAround: Float = 0f
         private var menuTemplate: Menu? = null
+        // TODO: 10.11.20 separate values to constants
+        /**
+         * Debug params
+         */
+        private var highLightDrag: Boolean = false
+
 
 
         fun withContext(context: Context): Builder {
@@ -236,6 +276,11 @@ open class SlideMenu private constructor(
             return this@Builder
         }
 
+        fun setContentElevation(elevation: Float): Builder {
+            this.elevation = elevation
+            return this@Builder
+        }
+
         fun setContentOpacity(opacity: Float): Builder {
             this.opacity = opacity
             return this@Builder
@@ -256,52 +301,24 @@ open class SlideMenu private constructor(
             return this@Builder
         }
 
-        fun fromTemplate(menuTemplate: Menu) {
+        fun fromTemplate(menuTemplate: Menu): Builder {
             this.menuTemplate = menuTemplate
+            return this@Builder
+        }
+
+        fun highlightDragView(highLightDrag: Boolean): Builder {
+            this.highLightDrag = highLightDrag
+            return this@Builder
         }
 
         fun build(): SlideMenu = SlideMenu(
             context, fragment, side, shadow, // Main args
-            dragWidthPercent, dragHeightPercent,
-            opacity, radius,
-            degreeHorizontal, degreeVertical, degreeAround,
-            menuTemplate
+            dragWidthPercent, dragHeightPercent, // Drag view size
+            elevation, opacity, radius, degreeHorizontal, degreeVertical, degreeAround, // Collapsed menu customization
+            menuTemplate,
+            highLightDrag // Debug params
         )
 
     }
 
 }
-
-/*
-val contentView = (context as FragmentActivity).findViewById<MotionLayout>(R.id.motionLayout)
-
-        context.supportFragmentManager
-            .beginTransaction()
-            .setReorderingAllowed(true)
-            .replace(R.id.contentFragment, fragment)
-            .commit()
-
-        contentView.getConstraintSet(R.id.weatherElapsed)
-            .let {
-                it.setFloatValue(R.id.contentFragment, RADIUS, 0f)
-                it.setFloatValue(R.id.contentFragment, ALPHA, 1f)
-
-                // Shadow
-                it.setFloatValue(R.id.shadowMock, RADIUS, 0f)
-                it.setFloatValue(R.id.shadowMock, ALPHA, 0f)
-            }
-
-        contentView.getConstraintSet(R.id.weatherCollapsed)
-            .let {
-                it.setRotationY(R.id.contentFragment, 0f) // rotation horizontal
-                it.setRotation(R.id.contentFragment, 10f) // rotate around center
-                it.setFloatValue(R.id.contentFragment, RADIUS, 100f)
-                it.setFloatValue(R.id.contentFragment, ALPHA, 0.2f)
-
-                // Shadow
-                it.setRotationY(R.id.shadowMock, 0f) // rotation horizontal
-                it.setRotation(R.id.shadowMock, 10f) // rotate around center
-                it.setFloatValue(R.id.shadowMock, RADIUS, 100f)
-                it.setFloatValue(R.id.shadowMock, ALPHA, 0.5f)
-            }
- */

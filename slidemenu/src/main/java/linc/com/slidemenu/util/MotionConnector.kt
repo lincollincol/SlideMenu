@@ -27,6 +27,14 @@ internal object MotionConnector {
     fun startToEndOf(actionViewId: Int, fixedViewId: Int) = connect(actionViewId, fixedViewId, START, END)
     fun endToEndOf(actionViewId: Int, fixedViewId: Int) = connect(actionViewId, fixedViewId, END, END)
 
+    fun allToView(actionViewId: Int, baseViewId: Int) {
+        connect(actionViewId, baseViewId, TOP, TOP)
+        connect(actionViewId, baseViewId, BOTTOM, BOTTOM)
+        connect(actionViewId, baseViewId, START, START)
+        connect(actionViewId, baseViewId, END, END)
+    }
+
+
 
     fun clearConnections(viewId: Int) {
         constraintSet?.let {

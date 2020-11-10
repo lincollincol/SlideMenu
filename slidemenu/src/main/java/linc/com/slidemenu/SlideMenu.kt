@@ -1,8 +1,11 @@
 package linc.com.slidemenu
 
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import linc.com.slidemenu.util.MotionConnector
@@ -18,14 +21,14 @@ open class SlideMenu private constructor(
     private val fragment: Fragment,
     private val side: MenuSide,
     private val shadow: Shadow,
-    private val widthPercent: Float,  // todo Deprecated
-    private val heightPercent: Float, // todo Deprecated
+    private val dragWidthPercent: Float,
+    private val dragHeightPercent: Float,
     private val opacity: Float,
     private val radius: Float,
-    private val degreeHorizontal: Float = 0f,
-    private val degreeVertical: Float = 0f,
-    private val degreeAround: Float = 0f,
-    private val menuTemplate: Menu? = null
+    private val degreeHorizontal: Float,
+    private val degreeVertical: Float,
+    private val degreeAround: Float,
+    private val menuTemplate: Menu?
 ) {
 
     // TODO: 06.11.20 footer
@@ -40,8 +43,6 @@ open class SlideMenu private constructor(
     */
 
     init {
-        // TODO: 06.11.20 rebuild scene markup according to menu side
-        // TODO: 06.11.20 rebuild layout markup according to menu side
 
         // TODO: 07.11.20 check for class cast exceptions
 
@@ -79,28 +80,23 @@ open class SlideMenu private constructor(
                 MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
                 MotionConnector.startToStartOf(R.id.dragView, ConstraintSet.PARENT_ID)
 
+                // Content and shadow
+                MotionConnector.allToView(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.allToView(R.id.shadowMock, ConstraintSet.PARENT_ID)
+
                 // Collapsed
                 MotionConnector.setConstraintSet(R.id.weatherCollapsed)
 
-                // Drag view
-                MotionConnector.clearConnections(R.id.dragView)
-                MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
-                MotionConnector.startToEndOf(R.id.dragView, ConstraintSet.PARENT_ID)
-                MotionConnector.endToEndOf(R.id.dragView, ConstraintSet.PARENT_ID)
-
                 // Content view
                 MotionConnector.clearConnections(R.id.contentFragment)
-                MotionConnector.topToTopOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
-                MotionConnector.bottomToBottomOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
                 MotionConnector.startToEndOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
                 MotionConnector.endToEndOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
 
+                // Drag view
+                MotionConnector.allToView(R.id.dragView, R.id.contentFragment)
+
                 // Shadow view
-                MotionConnector.clearConnections(R.id.shadowMock)
-                MotionConnector.topToTopOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
-                MotionConnector.bottomToBottomOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
-                MotionConnector.startToEndOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
-                MotionConnector.endToEndOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.allToView(R.id.shadowMock, R.id.contentFragment)
             }
             MenuSide.END -> {
                 // Elapsed
@@ -111,28 +107,23 @@ open class SlideMenu private constructor(
                 MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
                 MotionConnector.endToEndOf(R.id.dragView, ConstraintSet.PARENT_ID)
 
+                // Content and shadow
+                MotionConnector.allToView(R.id.contentFragment, ConstraintSet.PARENT_ID)
+                MotionConnector.allToView(R.id.shadowMock, ConstraintSet.PARENT_ID)
+
                 // Collapsed
                 MotionConnector.setConstraintSet(R.id.weatherCollapsed)
 
-                // Drag view
-                MotionConnector.clearConnections(R.id.dragView)
-                MotionConnector.topToTopOf(R.id.dragView, ConstraintSet.PARENT_ID)
-                MotionConnector.startToStartOf(R.id.dragView, ConstraintSet.PARENT_ID)
-                MotionConnector.endToStartOf(R.id.dragView, ConstraintSet.PARENT_ID)
-
                 // Content view
                 MotionConnector.clearConnections(R.id.contentFragment)
-                MotionConnector.topToTopOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
-                MotionConnector.bottomToBottomOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
                 MotionConnector.startToStartOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
                 MotionConnector.endToStartOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
 
+                // Drag view
+                MotionConnector.allToView(R.id.dragView, R.id.contentFragment)
+
                 // Shadow view
-                MotionConnector.clearConnections(R.id.shadowMock)
-                MotionConnector.topToTopOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
-                MotionConnector.bottomToBottomOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
-                MotionConnector.startToStartOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
-                MotionConnector.endToStartOf(R.id.shadowMock, ConstraintSet.PARENT_ID)
+                MotionConnector.allToView(R.id.shadowMock, R.id.contentFragment)
 
             }
             MenuSide.BOTTOM -> {
@@ -151,8 +142,13 @@ open class SlideMenu private constructor(
      * */
     private fun applyCustomMenuParameters() {
         val contentView = (context as FragmentActivity).findViewById<MotionLayout>(R.id.motionLayout)
+
         contentView.getConstraintSet(R.id.weatherElapsed)
             .let {
+                // Drag view
+                it.constrainPercentHeight(R.id.dragView, dragHeightPercent)
+                it.constrainPercentWidth(R.id.dragView, dragWidthPercent)
+
                 it.setFloatValue(R.id.contentFragment, RADIUS, 0f)
                 it.setFloatValue(R.id.contentFragment, ALPHA, 1f)
 
@@ -163,14 +159,17 @@ open class SlideMenu private constructor(
 
         contentView.getConstraintSet(R.id.weatherCollapsed)
             .let {
+                // Drag view
+
+                // Content fragment
                 it.setRotationY(R.id.contentFragment, 0f) // rotation horizontal
-                it.setRotation(R.id.contentFragment, 10f) // rotate around center
+                it.setRotation(R.id.contentFragment, 0f) // rotate around center
                 it.setFloatValue(R.id.contentFragment, RADIUS, 100f)
                 it.setFloatValue(R.id.contentFragment, ALPHA, 0.2f)
 
                 // Shadow
                 it.setRotationY(R.id.shadowMock, 0f) // rotation horizontal
-                it.setRotation(R.id.shadowMock, 10f) // rotate around center
+                it.setRotation(R.id.shadowMock, 0f) // rotate around center
                 it.setFloatValue(R.id.shadowMock, RADIUS, 100f)
                 it.setFloatValue(R.id.shadowMock, ALPHA, 0.5f)
             }
@@ -192,8 +191,8 @@ open class SlideMenu private constructor(
         private lateinit var fragment: Fragment
         private lateinit var side: MenuSide
         private var shadow: Shadow = Shadow.getDefault()
-        private var widthPercent: Float = 0.4f
-        private var heightPercent: Float = 0.7f
+        private var dragWidthPercent: Float = 0.25f
+        private var dragHeightPercent: Float = 0.4f
         private var opacity: Float = 1f
         private var radius: Float = 0f
         private var degreeHorizontal: Float = 0f
@@ -222,13 +221,13 @@ open class SlideMenu private constructor(
             return this@Builder
         }
 
-        fun setContentCollapsedWidth(widthPercent: Float): Builder {
-            this.widthPercent = widthPercent
+        fun setDragViewWidth(dragWidthPercent: Float): Builder {
+            this.dragWidthPercent = dragWidthPercent
             return this@Builder
         }
 
-        fun setContentCollapsedHeight(heightPercent: Float): Builder {
-            this.heightPercent = heightPercent
+        fun setDragViewHeight(dragHeightPercent: Float): Builder {
+            this.dragHeightPercent = dragHeightPercent
             return this@Builder
         }
 
@@ -263,7 +262,7 @@ open class SlideMenu private constructor(
 
         fun build(): SlideMenu = SlideMenu(
             context, fragment, side, shadow, // Main args
-            widthPercent, heightPercent,
+            dragWidthPercent, dragHeightPercent,
             opacity, radius,
             degreeHorizontal, degreeVertical, degreeAround,
             menuTemplate

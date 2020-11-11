@@ -1,4 +1,4 @@
-package linc.com.slidemenu.util
+package linc.com.slidemenu.models
 
 import android.graphics.Color
 import androidx.annotation.ColorInt

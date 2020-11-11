@@ -2,25 +2,37 @@ package linc.com.slidemenu
 
 import android.content.Context
 import android.graphics.Color
+import android.util.LayoutDirection
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import linc.com.slidemenu.util.MotionConnector
+import linc.com.slidemenu.models.CollapseSide
+import linc.com.slidemenu.models.MenuItem
+import linc.com.slidemenu.models.Section
+import linc.com.slidemenu.models.Shadow
 import linc.com.slidemenu.util.Constants.ALPHA
 import linc.com.slidemenu.util.Constants.BACKGROUND_COLOR
 import linc.com.slidemenu.util.Constants.CARD_COLOR
 import linc.com.slidemenu.util.Constants.CARD_ELEVATION
 import linc.com.slidemenu.util.Constants.RADIUS
-import linc.com.slidemenu.util.Menu
-import linc.com.slidemenu.util.MenuSide
-import linc.com.slidemenu.util.Shadow
+import linc.com.slidemenu.util.MenuTemplate
+import linc.com.slidemenu.util.MotionConnector
 
 
 open class SlideMenu private constructor(
     private val context: Context,
     private val fragment: Fragment,
-    private val side: MenuSide,
+    private val menuItems: List<MenuItem>,
+    private val side: CollapseSide,
     private val shadow: Shadow,
     private val dragWidthPercent: Float,
     private val dragHeightPercent: Float,
@@ -30,11 +42,11 @@ open class SlideMenu private constructor(
     private val degreeHorizontal: Float,
     private val degreeVertical: Float,
     private val degreeAround: Float,
-    private val menuTemplate: Menu?,
+    private val menuTemplateTemplate: MenuTemplate?,
     // Debug params
-    private var highLightDrag: Boolean
+    private val highLightDrag: Boolean
 
-) {
+) : View.OnClickListener {
 
     // TODO: 06.11.20 footer
     // TODO: 06.11.20 header
@@ -43,11 +55,16 @@ open class SlideMenu private constructor(
 
     /**
     * . . .
-    * todo Task: apply all parameters to menu
+    * todo Task: menu controllers groups
     * . . .
     */
 
     private var parentMotionLayout: MotionLayout
+
+    override fun onClick(p0: View?) {
+
+        println("p0.id = ${p0!!.id}")
+    }
 
     init {
 
@@ -65,9 +82,14 @@ open class SlideMenu private constructor(
         // Init MotionConnector
         MotionConnector.setParentLayout(parentMotionLayout)
 
-        // Apply external customization
+        // Re-constraint layout views according to params
         rebuildLayout()
+
+        // Apply layout customization
         applyCustomMenuParameters()
+
+        // Add menu items to all sections
+        addMenuItems()
     }
 
     /**
@@ -75,13 +97,14 @@ open class SlideMenu private constructor(
      * */
     private fun rebuildLayout() {
         // Rebuild layout form template
-        if(menuTemplate != null) {
+        if(menuTemplateTemplate != null) {
             rebuildLayoutFromTemplate()
             return
         }
 
+        // TODO: 10.11.20 rebuild menu controllers view
         when(side) {
-            MenuSide.START -> {
+            CollapseSide.START -> {
                 // Elapsed
                 MotionConnector.setConstraintSet(R.id.weatherElapsed)
 
@@ -108,7 +131,7 @@ open class SlideMenu private constructor(
                 // Shadow view
                 MotionConnector.allToView(R.id.shadowMock, R.id.contentFragment)
             }
-            MenuSide.END -> {
+            CollapseSide.END -> {
                 // Elapsed
                 MotionConnector.setConstraintSet(R.id.weatherElapsed)
 
@@ -136,9 +159,6 @@ open class SlideMenu private constructor(
                 MotionConnector.allToView(R.id.shadowMock, R.id.contentFragment)
 
             }
-            MenuSide.BOTTOM -> {
-                // TODO: 10.11.20 create bottom menu
-            }
         }
     }
 
@@ -155,10 +175,10 @@ open class SlideMenu private constructor(
         applyDragCustomization()
 
         // Content view layout params
-        applyMenuCustomization(R.id.contentFragment)
+        applyContentCustomization(R.id.contentFragment)
 
         // Shadow view layout params
-        applyMenuCustomization(R.id.shadowMock)
+        applyContentCustomization(R.id.shadowMock)
 
         // Shadow customization
         applyShadowCustomization()
@@ -184,7 +204,7 @@ open class SlideMenu private constructor(
             }
     }
 
-    private fun applyMenuCustomization(viewId: Int) {
+    private fun applyContentCustomization(viewId: Int) {
         parentMotionLayout.getConstraintSet(R.id.weatherElapsed)
             .let {
                 it.setFloatValue(viewId, CARD_ELEVATION, 1f)
@@ -213,6 +233,54 @@ open class SlideMenu private constructor(
             }
     }
 
+    /**
+     * Menu items
+     */
+
+    private fun addMenuItems() {
+        menuItems.forEach {
+            when(it.section) {
+                Section.HEADER -> addHeaderItem(it)
+                Section.FOOTER -> addFooterItem(it)
+                Section.CONTROLLER -> addControllerItem(it)
+            }
+        }
+    }
+
+    private fun addHeaderItem(item: MenuItem) {
+        addItemHorizontal(item, (context as FragmentActivity).findViewById(R.id.menuHeader))
+    }
+
+    private fun addFooterItem(item: MenuItem) {
+        addItemHorizontal(item, (context as FragmentActivity).findViewById(R.id.menuFooter))
+    }
+
+    private fun addControllerItem(item: MenuItem) {
+
+    }
+
+    private fun addItemHorizontal(item: MenuItem, parentView: RelativeLayout) {
+        parentView.addView(LayoutInflater.from(context)
+            .inflate(item.resource, null)
+            .apply {
+                // todo save id and item key to map
+                id = View.generateViewId()
+                setOnClickListener(this@SlideMenu)
+            },
+            RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                // Align view to center
+                addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
+
+                // Align view by horizontalPosition
+                addRule(when(item.horizontalPosition) {
+                    MenuItem.START -> RelativeLayout.ALIGN_PARENT_START
+                    MenuItem.CENTER -> RelativeLayout.CENTER_VERTICAL
+                    else -> RelativeLayout.ALIGN_PARENT_END
+                }, RelativeLayout.TRUE)
+            }
+        )
+    }
+
     class Builder {
 
         // TODO: 08.11.20 disable drag view
@@ -222,17 +290,18 @@ open class SlideMenu private constructor(
 
         private lateinit var context: Context
         private lateinit var fragment: Fragment
-        private lateinit var side: MenuSide
+        private val menuItems: MutableList<MenuItem> = mutableListOf()
+        private lateinit var side: CollapseSide
         private var shadow: Shadow = Shadow.getDefault()
         private var dragWidthPercent: Float = 0.25f
         private var dragHeightPercent: Float = 0.4f
-        private var elevation: Float = 10f
+        private var elevation: Float = 5f
         private var opacity: Float = 1f
         private var radius: Float = 0f
         private var degreeHorizontal: Float = 0f
         private var degreeVertical: Float = 0f
         private var degreeAround: Float = 0f
-        private var menuTemplate: Menu? = null
+        private var menuTemplateTemplate: MenuTemplate? = null
         // TODO: 10.11.20 separate values to constants
         /**
          * Debug params
@@ -251,8 +320,13 @@ open class SlideMenu private constructor(
             return this@Builder
         }
 
-        fun setMenuSide(side: MenuSide): Builder {
+        fun setMenuSide(side: CollapseSide): Builder {
             this.side = side
+            return this@Builder
+        }
+
+        fun addMenuItem(item: MenuItem): Builder {
+            this.menuItems.add(item)
             return this@Builder
         }
 
@@ -277,7 +351,7 @@ open class SlideMenu private constructor(
         }
 
         fun setContentElevation(elevation: Float): Builder {
-            this.elevation = elevation
+            this.elevation = if(elevation <= 0) 1f else elevation
             return this@Builder
         }
 
@@ -301,8 +375,8 @@ open class SlideMenu private constructor(
             return this@Builder
         }
 
-        fun fromTemplate(menuTemplate: Menu): Builder {
-            this.menuTemplate = menuTemplate
+        fun fromTemplate(menuTemplateTemplate: MenuTemplate): Builder {
+            this.menuTemplateTemplate = menuTemplateTemplate
             return this@Builder
         }
 
@@ -312,10 +386,10 @@ open class SlideMenu private constructor(
         }
 
         fun build(): SlideMenu = SlideMenu(
-            context, fragment, side, shadow, // Main args
+            context, fragment, menuItems, side, shadow, // Main args
             dragWidthPercent, dragHeightPercent, // Drag view size
             elevation, opacity, radius, degreeHorizontal, degreeVertical, degreeAround, // Collapsed menu customization
-            menuTemplate,
+            menuTemplateTemplate,
             highLightDrag // Debug params
         )
 

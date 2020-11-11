@@ -17,8 +17,21 @@ class MainActivity : AppCompatActivity() {
             .withContext(this)
             .setContentFragment(ContentFragment())
             .setMenuSide(CollapseSide.START)
+            // HEADER
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.START, Section.HEADER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.CENTER, Section.HEADER, "aa"))
             .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.END, Section.HEADER, "aa"))
+            // FOOTER
             .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.START, Section.FOOTER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.CENTER, Section.FOOTER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.END, Section.FOOTER, "aa"))
+            // Controllers
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.START, Section.CONTROLLER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.START, Section.CONTROLLER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.CENTER, Section.CONTROLLER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.CENTER, Section.CONTROLLER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.END, Section.CONTROLLER, "aa"))
+            .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.END, Section.CONTROLLER, "aa"))
             .setContentShadow(Shadow(Color.GRAY, 0.5f))
             .highlightDragView(true)
             .build()

@@ -24,8 +24,10 @@ import linc.com.slidemenu.util.Constants.BACKGROUND_COLOR
 import linc.com.slidemenu.util.Constants.CARD_COLOR
 import linc.com.slidemenu.util.Constants.CARD_ELEVATION
 import linc.com.slidemenu.util.Constants.RADIUS
+import linc.com.slidemenu.util.ExternalContext
 import linc.com.slidemenu.util.MenuTemplate
 import linc.com.slidemenu.util.MotionConnector
+import java.lang.ClassCastException
 
 
 open class SlideMenu private constructor(
@@ -48,18 +50,20 @@ open class SlideMenu private constructor(
 
 ) : View.OnClickListener {
 
-    // TODO: 06.11.20 footer
-    // TODO: 06.11.20 header
-    // TODO: 06.11.20 content
-    // TODO: 06.11.20 add item to one of above parts
-
     /**
     * . . .
     * todo Task: menu controllers groups
     * . . .
     */
 
+
+    // TODO: 11.11.20 navigation
+
     private var parentMotionLayout: MotionLayout
+    private var menuHeader: RelativeLayout
+    private var menuFooter: RelativeLayout
+    private var menuController: LinearLayout
+    private var externalContext: ExternalContext
 
     override fun onClick(p0: View?) {
 
@@ -67,17 +71,35 @@ open class SlideMenu private constructor(
     }
 
     init {
-
-        // TODO: 07.11.20 check for class cast exceptions
+        // Init external container
+        externalContext = ExternalContext(context)
 
         // Start content fragment
-        (context as FragmentActivity).supportFragmentManager
-            .beginTransaction()
-            .setReorderingAllowed(true)
-            .replace(R.id.contentFragment, fragment)
-            .commit()
+        when {
+            externalContext.isActivity() -> externalContext.getActivity().supportFragmentManager
+            else -> externalContext.getFragment().fragmentManager
+        }?.let {
+            it.beginTransaction()
+                .setReorderingAllowed(true)
+                .replace(R.id.contentFragment, fragment)
+                .commit()
+        }
 
-        parentMotionLayout = context.findViewById(R.id.motionLayout)
+        // Init parent motion layout and menu views
+         when {
+            externalContext.isActivity() -> {
+                parentMotionLayout = externalContext.getActivity().findViewById(R.id.motionLayout)
+                menuHeader = externalContext.getActivity().findViewById(R.id.menuHeader)
+                menuFooter = externalContext.getActivity().findViewById(R.id.menuFooter)
+                menuController = externalContext.getActivity().findViewById(R.id.menuController)
+            }
+            else -> {
+                parentMotionLayout = externalContext.getFragment().view!!.findViewById(R.id.motionLayout)
+                menuHeader = externalContext.getActivity().findViewById(R.id.menuHeader)
+                menuFooter = externalContext.getActivity().findViewById(R.id.menuFooter)
+                menuController = externalContext.getActivity().findViewById(R.id.menuController)
+            }
+        }
 
         // Init MotionConnector
         MotionConnector.setParentLayout(parentMotionLayout)
@@ -248,25 +270,29 @@ open class SlideMenu private constructor(
     }
 
     private fun addHeaderItem(item: MenuItem) {
-        addItemHorizontal(item, (context as FragmentActivity).findViewById(R.id.menuHeader))
+        addItemHorizontal(item, menuHeader)
     }
 
     private fun addFooterItem(item: MenuItem) {
-        addItemHorizontal(item, (context as FragmentActivity).findViewById(R.id.menuFooter))
+        addItemHorizontal(item, menuFooter)
     }
 
     private fun addControllerItem(item: MenuItem) {
-
+        menuController.addView(
+            inflateResource(item),
+            LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                gravity = when(item.horizontalPosition) {
+                    MenuItem.START -> Gravity.START
+                    MenuItem.CENTER -> Gravity.CENTER
+                    else -> Gravity.END
+                }
+            }
+        )
     }
 
     private fun addItemHorizontal(item: MenuItem, parentView: RelativeLayout) {
-        parentView.addView(LayoutInflater.from(context)
-            .inflate(item.resource, null)
-            .apply {
-                // todo save id and item key to map
-                id = View.generateViewId()
-                setOnClickListener(this@SlideMenu)
-            },
+        parentView.addView(
+            inflateResource(item),
             RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 // Align view to center
                 addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
@@ -274,12 +300,21 @@ open class SlideMenu private constructor(
                 // Align view by horizontalPosition
                 addRule(when(item.horizontalPosition) {
                     MenuItem.START -> RelativeLayout.ALIGN_PARENT_START
-                    MenuItem.CENTER -> RelativeLayout.CENTER_VERTICAL
+                    MenuItem.CENTER -> RelativeLayout.CENTER_IN_PARENT
                     else -> RelativeLayout.ALIGN_PARENT_END
                 }, RelativeLayout.TRUE)
             }
         )
     }
+
+    private fun inflateResource(item: MenuItem): View = LayoutInflater.from(context)
+        .inflate(item.resource, null)
+        .apply {
+            // todo save id and item key to map
+            id = View.generateViewId()
+            setOnClickListener(this@SlideMenu)
+        }
+
 
     class Builder {
 

@@ -55,18 +55,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <LinearLayout
-        android:id="@+id/menuController"
+    <ScrollView
+        android:id="@+id/menuControllersScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:background="#2FFF00"
-        android:elevation="0dp"
+        android:fillViewport="true"
         app:layout_constraintWidth_percent="0.65"
         app:layout_constraintHeight_percent="0.7"
         app:layout_constraintTop_toBottomOf="@id/menuHeader"
         app:layout_constraintBottom_toTopOf="@id/menuFooter"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:id="@+id/menuController"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+    </ScrollView>
 
     <RelativeLayout
         android:id="@+id/menuFooter"

@@ -6,7 +6,7 @@ import androidx.fragment.app.FragmentActivity
 import java.lang.ClassCastException
 
 class ExternalContext(private val context: Context) {
-    private lateinit var parent: Parent
+    private val parent: Parent
 
     init {
         this.parent = try {

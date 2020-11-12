@@ -34,7 +34,9 @@ internal object MotionConnector {
         connect(actionViewId, baseViewId, END, END)
     }
 
-
+    fun removeConnection(viewId: Int, side: Int) {
+        constraintSet?.clear(viewId, START)
+    }
 
     fun clearConnections(viewId: Int) {
         constraintSet?.let {

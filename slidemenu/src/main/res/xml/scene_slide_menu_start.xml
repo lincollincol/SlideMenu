@@ -60,7 +60,7 @@
         </Constraint>
 
         <Constraint
-            android:id="@+id/menuController">
+            android:id="@+id/menuControllersScrollView">
             <Layout
                 app:layout_constraintWidth_percent="0.65"
                 app:layout_constraintHeight_percent="0.7"
@@ -128,7 +128,7 @@
         </Constraint>
 
         <Constraint
-            android:id="@+id/menuController">
+            android:id="@+id/menuControllersScrollView">
             <PropertySet
                 android:alpha="1"/>
         </Constraint>

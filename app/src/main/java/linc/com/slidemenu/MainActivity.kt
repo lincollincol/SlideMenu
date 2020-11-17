@@ -1,5 +1,6 @@
 package linc.com.slidemenu
 
+import android.content.res.Configuration
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,11 +11,14 @@ import linc.com.slidemenu.models.Section
 import linc.com.slidemenu.models.Shadow
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var slideMenu: SlideMenu
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.slide_menu_layout)
 
-        val sm = SlideMenu.Builder()
+        slideMenu = SlideMenu.Builder()
             .withContext(this)
             .setContentFragment(ContentFragment())
             .setMenuSide(CollapseSide.END)
@@ -38,6 +42,14 @@ class MainActivity : AppCompatActivity() {
             .highlightDragView(true)
             .build()
 
+//        slideMenu.handleConfiguration(Configuration().apply {
+//            orientation = Configuration.ORIENTATION_LANDSCAPE
+//        });
+    }
 
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        slideMenu.handleConfiguration(newConfig)
     }
 }

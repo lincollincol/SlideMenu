@@ -1,13 +1,13 @@
 package linc.com.slidemenu
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
-import android.widget.MediaController
 import android.widget.RelativeLayout
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -21,6 +21,10 @@ import linc.com.slidemenu.util.Constants.ALPHA
 import linc.com.slidemenu.util.Constants.BACKGROUND_COLOR
 import linc.com.slidemenu.util.Constants.CARD_COLOR
 import linc.com.slidemenu.util.Constants.CARD_ELEVATION
+import linc.com.slidemenu.util.Constants.LANDSCAPE_CONTROLLER_FULL_HEIGHT_PERCENT
+import linc.com.slidemenu.util.Constants.LANDSCAPE_CONTROLLER_ONE_GROUP_HEIGHT_PERCENT
+import linc.com.slidemenu.util.Constants.LANDSCAPE_CONTROLLER_TWO_GROUPS_HEIGHT_PERCENT
+import linc.com.slidemenu.util.Constants.LANDSCAPE_HEADER_HEIGHT_PERCENT
 import linc.com.slidemenu.util.Constants.RADIUS
 import linc.com.slidemenu.util.ExternalContext
 import linc.com.slidemenu.util.MenuTemplate
@@ -50,7 +54,8 @@ open class SlideMenu private constructor(
 
     /**
     * . . .
-    * todo Task: menu controllers groups
+    * todo Task: menu click listener
+    * todo Task: landscape rotation
     * . . .
     */
 
@@ -62,6 +67,9 @@ open class SlideMenu private constructor(
     private val menuFooter: RelativeLayout
     private val menuController: LinearLayout
     private val externalContext: ExternalContext
+
+    private var hasHeader = false
+    private var hasFooter = false
 
     override fun onClick(p0: View?) {
 
@@ -144,6 +152,16 @@ open class SlideMenu private constructor(
                 MotionConnector.removeConnection(R.id.menuControllersScrollView, ConstraintSet.END)
                 MotionConnector.startToStartOf(R.id.menuControllersScrollView, ConstraintSet.PARENT_ID)
 
+/*
+                // Menu header
+                MotionConnector.removeConnection(R.id.menuHeader, ConstraintSet.END)
+                MotionConnector.startToStartOf(R.id.menuHeader, ConstraintSet.PARENT_ID)
+
+                // Menu footer
+                MotionConnector.removeConnection(R.id.menuFooter, ConstraintSet.END)
+                MotionConnector.startToStartOf(R.id.menuFooter, ConstraintSet.PARENT_ID)
+*/
+
                 //
                 // Collapsed
                 //
@@ -178,6 +196,16 @@ open class SlideMenu private constructor(
                 MotionConnector.removeConnection(R.id.menuControllersScrollView, ConstraintSet.START)
                 MotionConnector.endToEndOf(R.id.menuControllersScrollView, ConstraintSet.PARENT_ID)
 
+/*
+                // Menu header
+                MotionConnector.removeConnection(R.id.menuHeader, ConstraintSet.START)
+                MotionConnector.endToEndOf(R.id.menuHeader, ConstraintSet.PARENT_ID)
+
+                // Menu footer
+                MotionConnector.removeConnection(R.id.menuFooter, ConstraintSet.START)
+                MotionConnector.endToEndOf(R.id.menuFooter, ConstraintSet.PARENT_ID)
+*/
+
                 //
                 // Collapsed
                 //
@@ -185,6 +213,7 @@ open class SlideMenu private constructor(
 
                 // Content view
                 MotionConnector.clearConnections(R.id.contentFragment)
+                MotionConnector.allToView(R.id.contentFragment, ConstraintSet.PARENT_ID)
                 MotionConnector.startToStartOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
                 MotionConnector.endToStartOf(R.id.contentFragment, ConstraintSet.PARENT_ID)
 
@@ -201,6 +230,119 @@ open class SlideMenu private constructor(
     private fun rebuildLayoutFromTemplate() {
         TODO("Not yet implemented")
     }
+
+    /**
+     * Screen configuration
+     */
+    fun handleConfiguration(newConfiguration: Configuration) {
+        when(newConfiguration.orientation) {
+            // Resize content fragment to landscape mode
+            Configuration.ORIENTATION_LANDSCAPE -> {
+
+                // Set 60% width under main content view to prevent progress animation
+                parentMotionLayout.getConstraintSet(R.id.weatherElapsed)
+                    .let {
+                        it.constrainPercentWidth(R.id.menuHeader, 0.6f)
+                        it.constrainPercentWidth(R.id.menuFooter, 0.6f)
+                    }
+
+                parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
+                    .let {
+                        it.constrainPercentWidth(R.id.contentFragment, 0.8f) // Content fragment use 40% of screen width
+                        it.constrainPercentHeight(R.id.contentFragment, 0.9f)
+                        // Content fragment
+                        it.setScaleX(R.id.contentFragment, 1f)
+                        it.setScaleY(R.id.contentFragment, 1f)
+
+                        // Footer and header height
+                        it.constrainPercentHeight(R.id.menuHeader, if(hasHeader) LANDSCAPE_HEADER_HEIGHT_PERCENT else 0f)
+                        it.constrainPercentHeight(R.id.menuFooter, if(hasFooter) LANDSCAPE_HEADER_HEIGHT_PERCENT else 0f)
+
+                        // Controller group. Use height according to footer and header
+                        it.constrainPercentHeight(R.id.menuControllersScrollView, when {
+                            hasHeader && hasFooter -> LANDSCAPE_CONTROLLER_TWO_GROUPS_HEIGHT_PERCENT
+                            hasHeader || hasFooter -> LANDSCAPE_CONTROLLER_ONE_GROUP_HEIGHT_PERCENT
+                            else -> LANDSCAPE_CONTROLLER_FULL_HEIGHT_PERCENT
+                        })
+
+                        // Footer and header width
+                        it.constrainPercentWidth(R.id.menuHeader, 0.6f)
+                        it.constrainPercentWidth(R.id.menuFooter, 0.6f)
+                        it.constrainPercentWidth(R.id.menuControllersScrollView, 0.6f)
+
+                    }
+
+                // Disconnect footer and header to content fragment container
+                fun removeMenuGroupsConnection(constraintId: Int, side: Int) {
+                    MotionConnector.setConstraintSet(constraintId)
+                    MotionConnector.removeConnection(R.id.menuHeader, side)
+                    MotionConnector.removeConnection(R.id.menuFooter, side)
+                }
+
+                when(side) {
+                    CollapseSide.START -> {
+                        // Menu groups
+                        removeMenuGroupsConnection(R.id.weatherCollapsed, ConstraintSet.END)
+                        removeMenuGroupsConnection(R.id.weatherElapsed, ConstraintSet.END)
+                    }
+                    CollapseSide.END -> {
+                        // Menu groups
+                        removeMenuGroupsConnection(R.id.weatherCollapsed, ConstraintSet.START)
+                        removeMenuGroupsConnection(R.id.weatherElapsed, ConstraintSet.START)
+                    }
+                }
+            }
+            // Set default portrait params to menu
+            Configuration.ORIENTATION_PORTRAIT -> {
+
+                // Set 100% width under main content view to prevent progress animation
+                parentMotionLayout.getConstraintSet(R.id.weatherElapsed)
+                    .let {
+                        it.constrainPercentWidth(R.id.menuHeader, 1f)
+                        it.constrainPercentWidth(R.id.menuFooter, 1f)
+                    }
+
+                // Resize content fragment to default portrait size
+                parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
+                    .let {
+                        it.constrainPercentWidth(R.id.menuHeader, 1f)
+                        it.constrainPercentWidth(R.id.menuFooter, 1f)
+
+                        it.setScaleX(R.id.contentFragment, 0.7f)
+                        it.setScaleY(R.id.contentFragment, 0.7f)
+                    }
+
+                // Connect footer and header back to parent
+                fun connectMenuGroupsToParentSide(constraintId: Int, side: Int) {
+                    MotionConnector.setConstraintSet(constraintId)
+                    when(side) {
+                        ConstraintSet.START -> {
+                            MotionConnector.startToStartOf(R.id.menuHeader, ConstraintSet.PARENT_ID)
+                            MotionConnector.startToStartOf(R.id.menuFooter, ConstraintSet.PARENT_ID)
+                        }
+                        ConstraintSet.END -> {
+                            MotionConnector.endToEndOf(R.id.menuHeader, ConstraintSet.PARENT_ID)
+                            MotionConnector.endToEndOf(R.id.menuFooter, ConstraintSet.PARENT_ID)
+                        }
+                    }
+                }
+
+                when(side) {
+                    CollapseSide.START -> {
+                        // Menu groups
+                        connectMenuGroupsToParentSide(R.id.weatherElapsed, ConstraintSet.END)
+                        connectMenuGroupsToParentSide(R.id.weatherCollapsed, ConstraintSet.END)
+                    }
+                    CollapseSide.END -> {
+                        // Menu groups
+                        connectMenuGroupsToParentSide(R.id.weatherElapsed, ConstraintSet.START)
+                        connectMenuGroupsToParentSide(R.id.weatherCollapsed, ConstraintSet.START)
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * Layout customization
@@ -286,10 +428,12 @@ open class SlideMenu private constructor(
 
     private fun addHeaderItem(item: MenuItem) {
         addItemHorizontal(item, menuHeader)
+        hasHeader = true
     }
 
     private fun addFooterItem(item: MenuItem) {
         addItemHorizontal(item, menuFooter)
+        hasFooter = true
     }
 
     private fun addControllerItem(item: MenuItem) {
@@ -469,6 +613,10 @@ open class SlideMenu private constructor(
             highLightDrag // Debug params
         )
 
+    }
+    
+    interface ClickListener {
+        fun onItemClicked(item: Map<String, Int>)
     }
 
 }

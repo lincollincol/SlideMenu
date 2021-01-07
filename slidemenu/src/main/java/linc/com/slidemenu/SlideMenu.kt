@@ -1,14 +1,17 @@
 package linc.com.slidemenu
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.cardview.widget.CardView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
@@ -29,6 +32,7 @@ import linc.com.slidemenu.util.Constants.RADIUS
 import linc.com.slidemenu.util.ExternalContext
 import linc.com.slidemenu.util.MenuTemplate
 import linc.com.slidemenu.util.MotionConnector
+import linc.com.slidemenu.util.ScreenManager
 
 
 open class SlideMenu private constructor(
@@ -66,7 +70,6 @@ open class SlideMenu private constructor(
     private val menuHeader: RelativeLayout
     private val menuFooter: RelativeLayout
     private val menuController: LinearLayout
-    private val externalContext: ExternalContext
 
     private var hasHeader = false
     private var hasFooter = false
@@ -78,12 +81,13 @@ open class SlideMenu private constructor(
 
     init {
         // Init external container
-        externalContext = ExternalContext(context)
+        ExternalContext.init(context)
+        ScreenManager.init()
 
         // Start content fragment
         when {
-            externalContext.isActivity() -> externalContext.getActivity().supportFragmentManager
-            else -> externalContext.getFragment().fragmentManager
+            ExternalContext.isActivity() -> ExternalContext.getActivity().supportFragmentManager
+            else -> ExternalContext.getFragment().fragmentManager
         }?.let {
             it.beginTransaction()
                 .setReorderingAllowed(true)
@@ -93,17 +97,17 @@ open class SlideMenu private constructor(
 
         // Init parent motion layout and menu views
          when {
-            externalContext.isActivity() -> {
-                parentMotionLayout = externalContext.getActivity().findViewById(R.id.motionLayout)
-                menuHeader = externalContext.getActivity().findViewById(R.id.menuHeader)
-                menuFooter = externalContext.getActivity().findViewById(R.id.menuFooter)
-                menuController = externalContext.getActivity().findViewById(R.id.menuController)
+            ExternalContext.isActivity() -> {
+                parentMotionLayout = ExternalContext.getActivity().findViewById(R.id.motionLayout)
+                menuHeader = ExternalContext.getActivity().findViewById(R.id.menuHeader)
+                menuFooter = ExternalContext.getActivity().findViewById(R.id.menuFooter)
+                menuController = ExternalContext.getActivity().findViewById(R.id.menuController)
             }
             else -> {
-                parentMotionLayout = externalContext.getFragment().view!!.findViewById(R.id.motionLayout)
-                menuHeader = externalContext.getActivity().findViewById(R.id.menuHeader)
-                menuFooter = externalContext.getActivity().findViewById(R.id.menuFooter)
-                menuController = externalContext.getActivity().findViewById(R.id.menuController)
+                parentMotionLayout = ExternalContext.getFragment().view!!.findViewById(R.id.motionLayout)
+                menuHeader = ExternalContext.getActivity().findViewById(R.id.menuHeader)
+                menuFooter = ExternalContext.getActivity().findViewById(R.id.menuFooter)
+                menuController = ExternalContext.getActivity().findViewById(R.id.menuController)
             }
         }
 
@@ -126,7 +130,61 @@ open class SlideMenu private constructor(
     /**
      * Layout rebuild
      * */
+    @SuppressLint("ClickableViewAccessibility")
     private fun rebuildLayout() {
+
+
+        val frag = ExternalContext.findViewById<CardView>(R.id.contentFragment)
+        val parent = ExternalContext.findViewById<MotionLayout>(R.id.motionLayout)
+        val drag = ExternalContext.findViewById<View>(R.id.dragView)
+
+        frag.setOnTouchListener { view, motionEvent ->
+//            println(ScreenManager.currentPercentPointByX(motionEvent.x.toInt()))
+            var prev_y = 0f
+            when(ScreenManager.currentPercentPointByX(motionEvent.x.toInt())) {
+                in 0..25 -> { // 25% of screen START menu mode
+                    if(prev_y == 0f)
+                        prev_y = motionEvent.y
+
+                    println(motionEvent.y)
+                    if(motionEvent.action == MotionEvent.ACTION_MOVE) {
+                        if(motionEvent.y in (prev_y - 5) .. (prev_y + 5)) {
+                            drag.visibility = View.VISIBLE
+
+                        }
+                    }
+                }
+                else -> {
+                    drag.visibility = View.GONE
+                    prev_y = 0f;
+                }
+            }
+            return@setOnTouchListener true
+        }
+
+        parent.addTransitionListener(object : MotionLayout.TransitionListener {
+            override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
+            override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
+            override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {}
+            override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
+                if(p0!!.progress == 0f) drag.visibility = View.GONE
+            }
+
+        })
+
+        /*frag.setOnTouchListener(object : OnSwipeTouchListener(context) {
+            override fun onSwipeRight() {
+                super.onSwipeRight()
+                parent.transitionToEnd()
+            }
+
+            override fun onSwipeLeft() {
+                super.onSwipeLeft()
+                parent.transitionToStart()
+            }
+        })*/
+
+
         // Rebuild layout form template
         if(menuTemplateTemplate != null) {
             rebuildLayoutFromTemplate()

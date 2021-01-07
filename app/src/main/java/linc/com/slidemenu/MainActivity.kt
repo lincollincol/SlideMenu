@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         slideMenu = SlideMenu.Builder()
             .withContext(this)
             .setContentFragment(ContentFragment())
-            .setMenuSide(CollapseSide.END)
+            .setMenuSide(CollapseSide.START)
             // HEADER
             .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.START, Section.HEADER, "aa"))
             .addMenuItem(MenuItem(R.layout.menu_view, MenuItem.CENTER, Section.HEADER, "aa"))

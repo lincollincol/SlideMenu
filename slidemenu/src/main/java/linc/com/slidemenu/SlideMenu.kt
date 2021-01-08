@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Point
+import android.os.Handler
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -74,6 +76,8 @@ open class SlideMenu private constructor(
     private var hasHeader = false
     private var hasFooter = false
 
+    private val handler = Handler()
+
     override fun onClick(p0: View?) {
 
         println("p0.id = ${p0!!.id}")
@@ -127,6 +131,25 @@ open class SlideMenu private constructor(
         enableMenuItemsClicks()
     }
 
+
+    open fun isTouched(view: View, event: MotionEvent): Boolean {
+        var touched = false
+        val count = event.pointerCount
+        val location = intArrayOf(0, 0)
+        view.getLocationOnScreen(location)
+        val min = Point(location[0], location[1])
+        val max = Point(min.x + view.width, min.y + view.height)
+        for (i in 0 until count) {
+            val rawX = event.getX(i).toInt()
+            val rawY = event.getY(i).toInt()
+            if (rawX >= min.x && rawX <= max.x && rawY >= min.y && rawY <= max.y) {
+                //Log.d("mylog", "***Found a view: " + v.getId());
+                touched = true
+                if (event.action == MotionEvent.ACTION_UP) touched = false
+            }
+        }
+        return touched
+    }
     /**
      * Layout rebuild
      * */
@@ -139,35 +162,63 @@ open class SlideMenu private constructor(
         val drag = ExternalContext.findViewById<View>(R.id.dragView)
 
         frag.setOnTouchListener { view, motionEvent ->
-//            println(ScreenManager.currentPercentPointByX(motionEvent.x.toInt()))
-            var prev_y = 0f
-            when(ScreenManager.currentPercentPointByX(motionEvent.x.toInt())) {
-                in 0..25 -> { // 25% of screen START menu mode
-                    if(prev_y == 0f)
-                        prev_y = motionEvent.y
+            when(motionEvent.action) {
 
-                    println(motionEvent.y)
-                    if(motionEvent.action == MotionEvent.ACTION_MOVE) {
-                        if(motionEvent.y in (prev_y - 5) .. (prev_y + 5)) {
-                            drag.visibility = View.VISIBLE
+                MotionEvent.ACTION_MOVE -> { // 25% of screen START menu mode
+                    if (ScreenManager.currentPercentPointByX(motionEvent.x.toInt()) in 0..25) {
+                        drag.visibility = View.VISIBLE
+                    }
 
+
+
+                    val runnable = object : Runnable {
+                        override fun run() {
+                            if(isTouched(drag, motionEvent)) {
+                                handler.postDelayed(this, 300)
+                            } else {
+                                if(parentMotionLayout.progress == 0f)
+                                    drag.visibility = View.GONE
+                            }
                         }
                     }
+                    handler.postDelayed(runnable, 300)
+
                 }
-                else -> {
+                MotionEvent.ACTION_UP -> {
                     drag.visibility = View.GONE
-                    prev_y = 0f;
+//                    println("UP")
                 }
             }
             return@setOnTouchListener true
         }
+
+/*
+        frag.setOnTouchListener { view, motionEvent ->
+            when(ScreenManager.currentPercentPointByX(motionEvent.x.toInt())) {
+                in 0..25 -> { // 25% of screen START menu mode
+                    if(motionEvent.action == MotionEvent.ACTION_MOVE) {
+                            drag.visibility = View.VISIBLE
+                    }
+                    Handler().postDelayed({
+                        if(parentMotionLayout.progress == 0f && motionEvent.action == MotionEvent.ACTION_UP)
+                            drag.visibility = View.GONE
+                    }, 500)
+
+                }
+                else -> {
+                    drag.visibility = View.GONE
+                }
+            }
+            return@setOnTouchListener true
+        }
+*/
 
         parent.addTransitionListener(object : MotionLayout.TransitionListener {
             override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
             override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
             override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {}
             override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
-                if(p0!!.progress == 0f) drag.visibility = View.GONE
+                if (p0!!.progress == 0f) drag.visibility = View.GONE
             }
 
         })
@@ -208,7 +259,10 @@ open class SlideMenu private constructor(
 
                 // Menu controllers
                 MotionConnector.removeConnection(R.id.menuControllersScrollView, ConstraintSet.END)
-                MotionConnector.startToStartOf(R.id.menuControllersScrollView, ConstraintSet.PARENT_ID)
+                MotionConnector.startToStartOf(
+                    R.id.menuControllersScrollView,
+                    ConstraintSet.PARENT_ID
+                )
 
 /*
                 // Menu header
@@ -251,7 +305,10 @@ open class SlideMenu private constructor(
                 MotionConnector.allToView(R.id.shadowMock, ConstraintSet.PARENT_ID)
 
                 // Menu controllers
-                MotionConnector.removeConnection(R.id.menuControllersScrollView, ConstraintSet.START)
+                MotionConnector.removeConnection(
+                    R.id.menuControllersScrollView,
+                    ConstraintSet.START
+                )
                 MotionConnector.endToEndOf(R.id.menuControllersScrollView, ConstraintSet.PARENT_ID)
 
 /*
@@ -306,22 +363,33 @@ open class SlideMenu private constructor(
 
                 parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
                     .let {
-                        it.constrainPercentWidth(R.id.contentFragment, 0.8f) // Content fragment use 40% of screen width
+                        it.constrainPercentWidth(
+                            R.id.contentFragment,
+                            0.8f
+                        ) // Content fragment use 40% of screen width
                         it.constrainPercentHeight(R.id.contentFragment, 0.9f)
                         // Content fragment
                         it.setScaleX(R.id.contentFragment, 1f)
                         it.setScaleY(R.id.contentFragment, 1f)
 
                         // Footer and header height
-                        it.constrainPercentHeight(R.id.menuHeader, if(hasHeader) LANDSCAPE_HEADER_HEIGHT_PERCENT else 0f)
-                        it.constrainPercentHeight(R.id.menuFooter, if(hasFooter) LANDSCAPE_HEADER_HEIGHT_PERCENT else 0f)
+                        it.constrainPercentHeight(
+                            R.id.menuHeader,
+                            if (hasHeader) LANDSCAPE_HEADER_HEIGHT_PERCENT else 0f
+                        )
+                        it.constrainPercentHeight(
+                            R.id.menuFooter,
+                            if (hasFooter) LANDSCAPE_HEADER_HEIGHT_PERCENT else 0f
+                        )
 
                         // Controller group. Use height according to footer and header
-                        it.constrainPercentHeight(R.id.menuControllersScrollView, when {
-                            hasHeader && hasFooter -> LANDSCAPE_CONTROLLER_TWO_GROUPS_HEIGHT_PERCENT
-                            hasHeader || hasFooter -> LANDSCAPE_CONTROLLER_ONE_GROUP_HEIGHT_PERCENT
-                            else -> LANDSCAPE_CONTROLLER_FULL_HEIGHT_PERCENT
-                        })
+                        it.constrainPercentHeight(
+                            R.id.menuControllersScrollView, when {
+                                hasHeader && hasFooter -> LANDSCAPE_CONTROLLER_TWO_GROUPS_HEIGHT_PERCENT
+                                hasHeader || hasFooter -> LANDSCAPE_CONTROLLER_ONE_GROUP_HEIGHT_PERCENT
+                                else -> LANDSCAPE_CONTROLLER_FULL_HEIGHT_PERCENT
+                            }
+                        )
 
                         // Footer and header width
                         it.constrainPercentWidth(R.id.menuHeader, 0.6f)
@@ -337,7 +405,7 @@ open class SlideMenu private constructor(
                     MotionConnector.removeConnection(R.id.menuFooter, side)
                 }
 
-                when(side) {
+                when (side) {
                     CollapseSide.START -> {
                         // Menu groups
                         removeMenuGroupsConnection(R.id.weatherCollapsed, ConstraintSet.END)
@@ -373,7 +441,7 @@ open class SlideMenu private constructor(
                 // Connect footer and header back to parent
                 fun connectMenuGroupsToParentSide(constraintId: Int, side: Int) {
                     MotionConnector.setConstraintSet(constraintId)
-                    when(side) {
+                    when (side) {
                         ConstraintSet.START -> {
                             MotionConnector.startToStartOf(R.id.menuHeader, ConstraintSet.PARENT_ID)
                             MotionConnector.startToStartOf(R.id.menuFooter, ConstraintSet.PARENT_ID)
@@ -385,7 +453,7 @@ open class SlideMenu private constructor(
                     }
                 }
 
-                when(side) {
+                when (side) {
                     CollapseSide.START -> {
                         // Menu groups
                         connectMenuGroupsToParentSide(R.id.weatherElapsed, ConstraintSet.END)
@@ -498,7 +566,7 @@ open class SlideMenu private constructor(
         menuController.addView(
             inflateResource(item),
             LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
-                gravity = when(item.horizontalPosition) {
+                gravity = when (item.horizontalPosition) {
                     MenuItem.START -> Gravity.START
                     MenuItem.CENTER -> Gravity.CENTER
                     else -> Gravity.END
@@ -515,11 +583,13 @@ open class SlideMenu private constructor(
                 addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE)
 
                 // Align view by horizontalPosition
-                addRule(when(item.horizontalPosition) {
-                    MenuItem.START -> RelativeLayout.ALIGN_PARENT_START
-                    MenuItem.CENTER -> RelativeLayout.CENTER_IN_PARENT
-                    else -> RelativeLayout.ALIGN_PARENT_END
-                }, RelativeLayout.TRUE)
+                addRule(
+                    when (item.horizontalPosition) {
+                        MenuItem.START -> RelativeLayout.ALIGN_PARENT_START
+                        MenuItem.CENTER -> RelativeLayout.CENTER_IN_PARENT
+                        else -> RelativeLayout.ALIGN_PARENT_END
+                    }, RelativeLayout.TRUE
+                )
             }
         )
     }
@@ -664,9 +734,20 @@ open class SlideMenu private constructor(
         }
 
         fun build(): SlideMenu = SlideMenu(
-            context, fragment, menuItems, controllerGravity, side, shadow, // Main args
-            dragWidthPercent, dragHeightPercent, // Drag view size
-            elevation, opacity, radius, degreeHorizontal, degreeVertical, degreeAround, // Collapsed menu customization
+            context,
+            fragment,
+            menuItems,
+            controllerGravity,
+            side,
+            shadow, // Main args
+            dragWidthPercent,
+            dragHeightPercent, // Drag view size
+            elevation,
+            opacity,
+            radius,
+            degreeHorizontal,
+            degreeVertical,
+            degreeAround, // Collapsed menu customization
             menuTemplateTemplate,
             highLightDrag // Debug params
         )

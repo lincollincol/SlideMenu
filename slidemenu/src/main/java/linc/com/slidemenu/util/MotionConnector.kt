@@ -1,5 +1,6 @@
 package linc.com.slidemenu.util
 
+import android.view.View
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -18,7 +19,7 @@ internal object MotionConnector {
         this.constraintSet = layout?.getConstraintSet(constraintSetId)
     }
 
-    fun topToTopOf(actionViewId: Int, fixedViewId: Int) =connect(actionViewId, fixedViewId, TOP, TOP)
+    fun topToTopOf(actionViewId: Int, fixedViewId: Int) = connect(actionViewId, fixedViewId, TOP, TOP)
     fun bottomToTopOf(actionViewId: Int, fixedViewId: Int) = connect(actionViewId, fixedViewId, BOTTOM, TOP)
     fun topToBottomOf(actionViewId: Int, fixedViewId: Int) = connect(actionViewId, fixedViewId, TOP, BOTTOM)
     fun bottomToBottomOf(actionViewId: Int, fixedViewId: Int) = connect(actionViewId, fixedViewId, BOTTOM, BOTTOM)

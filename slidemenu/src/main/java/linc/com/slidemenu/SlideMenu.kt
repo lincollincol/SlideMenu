@@ -54,7 +54,7 @@ open class SlideMenu private constructor(
     private val degreeAround: Float,
     private val menuTemplateTemplate: MenuTemplate?,
     // Debug params
-    private val highLightDrag: Boolean
+    private val highlightDrag: Boolean
 
 ) : View.OnClickListener {
 
@@ -100,20 +100,11 @@ open class SlideMenu private constructor(
         }
 
         // Init parent motion layout and menu views
-         when {
-            ExternalContext.isActivity() -> {
-                parentMotionLayout = ExternalContext.getActivity().findViewById(R.id.motionLayout)
-                menuHeader = ExternalContext.getActivity().findViewById(R.id.menuHeader)
-                menuFooter = ExternalContext.getActivity().findViewById(R.id.menuFooter)
-                menuController = ExternalContext.getActivity().findViewById(R.id.menuController)
-            }
-            else -> {
-                parentMotionLayout = ExternalContext.getFragment().view!!.findViewById(R.id.motionLayout)
-                menuHeader = ExternalContext.getActivity().findViewById(R.id.menuHeader)
-                menuFooter = ExternalContext.getActivity().findViewById(R.id.menuFooter)
-                menuController = ExternalContext.getActivity().findViewById(R.id.menuController)
-            }
-        }
+
+        parentMotionLayout = ExternalContext.findViewById(R.id.motionLayout)
+        menuHeader = ExternalContext.findViewById(R.id.menuHeader)
+        menuFooter = ExternalContext.findViewById(R.id.menuFooter)
+        menuController = ExternalContext.findViewById(R.id.menuController)
 
         // Init MotionConnector
         MotionConnector.setParentLayout(parentMotionLayout)
@@ -131,111 +122,10 @@ open class SlideMenu private constructor(
         enableMenuItemsClicks()
     }
 
-
-    open fun isTouched(view: View, event: MotionEvent): Boolean {
-        var touched = false
-        val count = event.pointerCount
-        val location = intArrayOf(0, 0)
-        view.getLocationOnScreen(location)
-        val min = Point(location[0], location[1])
-        val max = Point(min.x + view.width, min.y + view.height)
-        for (i in 0 until count) {
-            val rawX = event.getX(i).toInt()
-            val rawY = event.getY(i).toInt()
-            if (rawX >= min.x && rawX <= max.x && rawY >= min.y && rawY <= max.y) {
-                //Log.d("mylog", "***Found a view: " + v.getId());
-                touched = true
-                if (event.action == MotionEvent.ACTION_UP) touched = false
-            }
-        }
-        return touched
-    }
     /**
      * Layout rebuild
      * */
-    @SuppressLint("ClickableViewAccessibility")
     private fun rebuildLayout() {
-
-
-        val frag = ExternalContext.findViewById<CardView>(R.id.contentFragment)
-        val parent = ExternalContext.findViewById<MotionLayout>(R.id.motionLayout)
-        val drag = ExternalContext.findViewById<View>(R.id.dragView)
-
-        frag.setOnTouchListener { view, motionEvent ->
-            when(motionEvent.action) {
-
-                MotionEvent.ACTION_MOVE -> { // 25% of screen START menu mode
-                    if (ScreenManager.currentPercentPointByX(motionEvent.x.toInt()) in 0..25) {
-                        drag.visibility = View.VISIBLE
-                    }
-
-
-
-                    val runnable = object : Runnable {
-                        override fun run() {
-                            if(isTouched(drag, motionEvent)) {
-                                handler.postDelayed(this, 300)
-                            } else {
-                                if(parentMotionLayout.progress == 0f)
-                                    drag.visibility = View.GONE
-                            }
-                        }
-                    }
-                    handler.postDelayed(runnable, 300)
-
-                }
-                MotionEvent.ACTION_UP -> {
-                    drag.visibility = View.GONE
-//                    println("UP")
-                }
-            }
-            return@setOnTouchListener true
-        }
-
-/*
-        frag.setOnTouchListener { view, motionEvent ->
-            when(ScreenManager.currentPercentPointByX(motionEvent.x.toInt())) {
-                in 0..25 -> { // 25% of screen START menu mode
-                    if(motionEvent.action == MotionEvent.ACTION_MOVE) {
-                            drag.visibility = View.VISIBLE
-                    }
-                    Handler().postDelayed({
-                        if(parentMotionLayout.progress == 0f && motionEvent.action == MotionEvent.ACTION_UP)
-                            drag.visibility = View.GONE
-                    }, 500)
-
-                }
-                else -> {
-                    drag.visibility = View.GONE
-                }
-            }
-            return@setOnTouchListener true
-        }
-*/
-
-        parent.addTransitionListener(object : MotionLayout.TransitionListener {
-            override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
-            override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
-            override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {}
-            override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
-                if (p0!!.progress == 0f) drag.visibility = View.GONE
-            }
-
-        })
-
-        /*frag.setOnTouchListener(object : OnSwipeTouchListener(context) {
-            override fun onSwipeRight() {
-                super.onSwipeRight()
-                parent.transitionToEnd()
-            }
-
-            override fun onSwipeLeft() {
-                super.onSwipeLeft()
-                parent.transitionToStart()
-            }
-        })*/
-
-
         // Rebuild layout form template
         if(menuTemplateTemplate != null) {
             rebuildLayoutFromTemplate()
@@ -495,14 +385,14 @@ open class SlideMenu private constructor(
             .let {
                 it.constrainPercentHeight(R.id.dragView, dragHeightPercent)
                 it.constrainPercentWidth(R.id.dragView, dragWidthPercent)
-                if(highLightDrag) {
+                if(highlightDrag) {
                     it.setIntValue(R.id.dragView, BACKGROUND_COLOR, Color.RED)
                     it.setFloatValue(R.id.dragView, ALPHA, 0.3f)
                 }
             }
         parentMotionLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
-                if(highLightDrag) {
+                if(highlightDrag) {
                     it.setIntValue(R.id.dragView, BACKGROUND_COLOR, Color.RED)
                     it.setFloatValue(R.id.dragView, ALPHA, 0.3f)
                 }
@@ -640,7 +530,7 @@ open class SlideMenu private constructor(
         // Content view parameters
         private lateinit var side: CollapseSide
         private var shadow: Shadow = Shadow.getDefault()
-        private var dragWidthPercent: Float = 0.25f
+        private var dragWidthPercent: Float = 0.03f
         private var dragHeightPercent: Float = 0.4f
         private var elevation: Float = 5f
         private var opacity: Float = 1f
@@ -651,7 +541,7 @@ open class SlideMenu private constructor(
         private var menuTemplateTemplate: MenuTemplate? = null
         // TODO: 10.11.20 separate values to constants
         // Debug params
-        private var highLightDrag: Boolean = false
+        private var highlightDrag: Boolean = false
 
         fun withContext(context: Context): Builder {
             this.context = context
@@ -729,7 +619,7 @@ open class SlideMenu private constructor(
         }
 
         fun highlightDragView(highLightDrag: Boolean): Builder {
-            this.highLightDrag = highLightDrag
+            this.highlightDrag = highLightDrag
             return this@Builder
         }
 
@@ -749,7 +639,7 @@ open class SlideMenu private constructor(
             degreeVertical,
             degreeAround, // Collapsed menu customization
             menuTemplateTemplate,
-            highLightDrag // Debug params
+            highlightDrag // Debug params
         )
 
     }

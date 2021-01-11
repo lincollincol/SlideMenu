@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/menuHeader"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:background="#2700FF"
+    android:elevation="0dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"/>

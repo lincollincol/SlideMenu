@@ -12,13 +12,14 @@ import linc.com.slidemenu.models.Shadow
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var slideMenu: SlideMenu
+//    private lateinit var slideMenu: SlideMenu
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.slide_menu_layout)
+//        setContentView(R.layout.slide_menu_layout)
+        setContentView(R.layout.activity_main)
 
-        slideMenu = SlideMenu.Builder()
+        /*slideMenu = SlideMenu.Builder()
             .withContext(this)
             .setContentFragment(ContentFragment())
             .setMenuSide(CollapseSide.START)
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             .setContentShadow(Shadow(Color.GRAY, 0.5f))
             .setControllerSectionGravity(Gravity.BOTTOM)
             .highlightDragView(true)
-            .build()
+            .build()*/
 
 //        slideMenu.handleConfiguration(Configuration().apply {
 //            orientation = Configuration.ORIENTATION_LANDSCAPE
@@ -50,6 +51,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        slideMenu.handleConfiguration(newConfig)
+//        slideMenu.handleConfiguration(newConfig)
     }
 }

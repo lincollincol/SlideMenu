@@ -20,9 +20,10 @@
 
         <!-- Content declaration -->
 
+        <!--            android:elevation="10dp"-->
         <Constraint
             android:id="@+id/dragView"
-            android:elevation="10dp"
+            android:elevation="2dp"
             app:visibilityMode="ignore" />
 
         <Constraint

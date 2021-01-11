@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/menuFooter"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:orientation="horizontal"
+    android:background="#FF00FB"
+    android:elevation="0dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"/>

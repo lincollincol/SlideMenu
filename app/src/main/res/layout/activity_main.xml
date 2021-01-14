@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:applyMotionScene="true"
+    app:layoutDescription="@xml/scene_slide_menu_start"
     tools:context=".MainActivity">
 
     <linc.com.slidemenu.SlideContainerView

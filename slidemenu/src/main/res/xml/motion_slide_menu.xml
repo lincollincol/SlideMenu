@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-</PreferenceScreen>
+    <Transition
+        app:constraintSetStart="@id/weatherElapsed"
+        app:constraintSetEnd="@id/weatherCollapsed"
+        app:duration="300">
+
+        <!--<OnSwipe
+            app:onTouchUp="autoComplete"
+            app:dragDirection="dragStart"
+            app:touchRegionId="@id/dragView"
+            app:touchAnchorId="@id/dragView"/>-->
+
+    </Transition>
+
+    <ConstraintSet
+        android:id="@+id/weatherElapsed">
+    </ConstraintSet>
+
+    <ConstraintSet
+        android:id="@+id/weatherCollapsed">
+    </ConstraintSet>
+
+</MotionScene>

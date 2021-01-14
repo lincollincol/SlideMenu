@@ -16,6 +16,7 @@ import android.widget.RelativeLayout
 import android.widget.ScrollView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.constraintlayout.motion.widget.MotionScene
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -70,7 +71,7 @@ class SlideMenuLayout(
 
         // Check for container
 
-        var hasFragmentContainer = false
+        /*var hasFragmentContainer = false
 
         for (index in 0 until childCount) {
             hasFragmentContainer = getChildAt(index) is SlideContainerView
@@ -84,8 +85,9 @@ class SlideMenuLayout(
             throw ContainerNotFoundException()
 
         // Prepare menu views
-        inflateMenu()
+        inflateMenu()*/
     }
+
 
     private fun inflateMenu() {
 
@@ -97,18 +99,29 @@ class SlideMenuLayout(
         menuControllerScrollView = LayoutInflater.from(context).inflate(R.layout.default_slide_menu, null) as ScrollView
         menuController = menuControllerScrollView.findViewById(R.id.menuController)
 
+        dragView.requestLayout()
+        shadowMock.requestLayout()
+        menuHeader.requestLayout()
+        menuFooter.requestLayout()
+        menuControllerScrollView.requestLayout()
+        menuController.requestLayout()
+
         this@SlideMenuLayout.addView(dragView)
         this@SlideMenuLayout.addView(shadowMock)
         this@SlideMenuLayout.addView(menuControllerScrollView)
         this@SlideMenuLayout.addView(menuHeader)
         this@SlideMenuLayout.addView(menuFooter)
 //        this@SlideMenuLayout.loadLayoutDescription(R.xml.scene_slide_menu_start)
-//        this@SlideMenuLayout.setTransition(R.id.weatherElapsed, R.id.weatherCollapsed)
-//        this@SlideMenuLayout.updateState()
+
+
+//        println("============================= ON_LAYOUT =============================")
+        println("============================= INIT_MENU =============================")
+
 //        this@SlideMenuLayout.constraintSetIds.forEach {
 //            when(it) {
 //                R.id.weatherCollapsed -> println("weatherCollapsed")
 //                R.id.weatherElapsed -> println("weatherElapsed")
+//                else -> println(it)
 //            }
 //        }
 
@@ -142,6 +155,25 @@ class SlideMenuLayout(
         enableMenuItemsClicks()
     }
 
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        var hasFragmentContainer = false
+
+        for (index in 0 until childCount) {
+            hasFragmentContainer = getChildAt(index) is SlideContainerView
+            if(hasFragmentContainer){
+                fragmentContainer = getChildAt(index) as SlideContainerView
+                break
+            }
+        }
+
+        if(!hasFragmentContainer)
+            throw ContainerNotFoundException()
+
+        // Prepare menu views
+        inflateMenu()
+    }
 
     override fun onClick(p0: View?) {
 

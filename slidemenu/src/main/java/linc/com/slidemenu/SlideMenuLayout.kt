@@ -66,12 +66,9 @@ class SlideMenuLayout(
     private var hasHeader = false
     private var hasFooter = false
 
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
-
-        // Check for container
-
-        /*var hasFragmentContainer = false
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        var hasFragmentContainer = false
 
         for (index in 0 until childCount) {
             hasFragmentContainer = getChildAt(index) is SlideContainerView
@@ -84,12 +81,16 @@ class SlideMenuLayout(
         if(!hasFragmentContainer)
             throw ContainerNotFoundException()
 
+        if(fragmentContainer.id != R.id.slideFragmentContainer)
+            throw InvalidIdException()
+
         // Prepare menu views
-        inflateMenu()*/
+        inflateMenu()
     }
 
-
     private fun inflateMenu() {
+
+        println("INFLATE")
 
         // Init parent motion layout and menu views
         dragView = LayoutInflater.from(context).inflate(R.layout.default_slide_drag, null)
@@ -111,32 +112,7 @@ class SlideMenuLayout(
         this@SlideMenuLayout.addView(menuControllerScrollView)
         this@SlideMenuLayout.addView(menuHeader)
         this@SlideMenuLayout.addView(menuFooter)
-//        this@SlideMenuLayout.loadLayoutDescription(R.xml.scene_slide_menu_start)
 
-
-//        println("============================= ON_LAYOUT =============================")
-        println("============================= INIT_MENU =============================")
-
-//        this@SlideMenuLayout.constraintSetIds.forEach {
-//            when(it) {
-//                R.id.weatherCollapsed -> println("weatherCollapsed")
-//                R.id.weatherElapsed -> println("weatherElapsed")
-//                else -> println(it)
-//            }
-//        }
-
-//        this@SlideMenuLayout.getConstraintSet(R.id.weatherElapsed).apply {
-//            this.clone(this)
-//
-//        }
-//        this@SlideMenuLayout.getConstraintSet(R.id.weatherCollapsed).clone(this)
-
-//        println("${dragView.id == R.id.dragView}")
-//        println("${shadowMock.id == R.id.shadowMock}")
-//        println("${menuHeader.id == R.id.menuHeader}")
-//        println("${menuFooter.id == R.id.menuFooter}")
-//        println("${menuController.id == R.id.menuController}")
-//        println("${menuControllerScrollView.id == R.id.menuControllersScrollView}")
 
 
         // Init MotionConnector
@@ -156,30 +132,10 @@ class SlideMenuLayout(
     }
 
 
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        var hasFragmentContainer = false
-
-        for (index in 0 until childCount) {
-            hasFragmentContainer = getChildAt(index) is SlideContainerView
-            if(hasFragmentContainer){
-                fragmentContainer = getChildAt(index) as SlideContainerView
-                break
-            }
-        }
-
-        if(!hasFragmentContainer)
-            throw ContainerNotFoundException()
-
-        // Prepare menu views
-        inflateMenu()
-    }
-
     override fun onClick(p0: View?) {
 
         println("p0.id = ${p0!!.id}")
     }
-
 
     /**
      * Layout rebuild

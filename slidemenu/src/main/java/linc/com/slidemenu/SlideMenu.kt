@@ -649,3 +649,162 @@ open class SlideMenu private constructor(
     }
 
 }
+
+
+
+/*
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        app:constraintSetStart="@id/weatherElapsed"
+        app:constraintSetEnd="@id/weatherCollapsed"
+        app:duration="300">
+
+        <OnSwipe
+            app:onTouchUp="autoComplete"
+            app:dragDirection="dragStart"
+            app:touchRegionId="@id/dragView"
+            app:touchAnchorId="@id/dragView"/>
+
+    </Transition>
+
+    <ConstraintSet
+        android:id="@+id/weatherElapsed">
+
+        <!-- Content declaration -->
+
+        <!--            android:elevation="10dp"-->
+        <Constraint
+            android:id="@+id/dragView"
+            android:elevation="2dp"
+            app:visibilityMode="ignore" />
+
+        <Constraint
+            android:id="@+id/contentFragment">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp" />
+            <Transform
+                android:scaleX="1"
+                android:scaleY="1"
+                android:elevation="1dp" />
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/shadowMock">
+            <Layout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:elevation="1dp" />
+            <Transform
+                android:scaleX="1"
+                android:scaleY="1"/>
+        </Constraint>
+
+        <!-- Menu declaration -->
+        <Constraint
+            android:id="@+id/menuHeader">
+            <Layout
+                app:layout_constraintWidth_percent="1"
+                app:layout_constraintHeight_percent="0.15"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+            <PropertySet
+                android:alpha="0.5"/>
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/menuControllersScrollView">
+            <Layout
+                app:layout_constraintWidth_percent="0.65"
+                app:layout_constraintHeight_percent="0.7"
+                app:layout_constraintTop_toBottomOf="@id/menuHeader"
+                app:layout_constraintBottom_toTopOf="@id/menuFooter"
+                app:layout_constraintStart_toStartOf="parent"/>
+            <PropertySet
+                android:alpha="0.5"/>
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/menuFooter">
+            <Layout
+                app:layout_constraintWidth_percent="1"
+                app:layout_constraintHeight_percent="0.15"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+            <PropertySet
+                android:alpha="0.5"/>
+        </Constraint>
+
+    </ConstraintSet>
+
+    <ConstraintSet
+        android:id="@+id/weatherCollapsed"
+        app:deriveConstraintsFrom="@+id/weatherElapsed">
+
+        <!-- Content declaration -->
+        <Constraint
+            android:id="@+id/dragView"
+            app:visibilityMode="ignore" >
+            <Layout
+                app:layout_constraintWidth_percent="0.7"
+                app:layout_constraintHeight_percent="0.7" />
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/contentFragment">
+            <Layout
+                app:layout_constraintWidth_percent="0.99"
+                app:layout_constraintHeight_percent="0.99"/>
+            <Transform
+                android:scaleX="0.7"
+                android:scaleY="0.7"
+                android:elevation="1dp" />
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/shadowMock">
+            <Layout
+                app:layout_constraintWidth_percent="0.99"
+                app:layout_constraintHeight_percent="0.99"/>
+            <Transform
+                android:scaleX="0.7"
+                android:scaleY="0.7"
+                android:elevation="1dp" />
+        </Constraint>
+
+        <!-- Menu declaration -->
+
+        <Constraint
+            android:id="@+id/menuHeader">
+            <PropertySet
+                android:alpha="1"/>
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/menuControllersScrollView">
+            <PropertySet
+                android:alpha="1"/>
+        </Constraint>
+
+        <Constraint
+            android:id="@+id/menuFooter">
+            <PropertySet
+                android:alpha="1"/>
+        </Constraint>
+
+    </ConstraintSet>
+
+</MotionScene>
+
+
+
+
+ */

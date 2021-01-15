@@ -19,6 +19,13 @@ class MainActivity : AppCompatActivity() {
 //        setContentView(R.layout.slide_menu_layout)
         setContentView(R.layout.activity_main)
 
+
+
+        supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(R.id.slideFragmentContainer, ContentFragment())
+            .commit()
+
         /*slideMenu = SlideMenu.Builder()
             .withContext(this)
             .setContentFragment(ContentFragment())

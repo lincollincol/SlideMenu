@@ -27,7 +27,7 @@
             app:visibilityMode="ignore" />
 
         <Constraint
-            android:id="@+id/contentFragment">
+            android:id="@+id/slideFragmentContainer">
             <Layout
                 android:layout_width="0dp"
                 android:layout_height="0dp" />
@@ -101,7 +101,7 @@
         </Constraint>
 
         <Constraint
-            android:id="@+id/contentFragment">
+            android:id="@+id/slideFragmentContainer">
             <Layout
                 app:layout_constraintWidth_percent="0.99"
                 app:layout_constraintHeight_percent="0.99"/>

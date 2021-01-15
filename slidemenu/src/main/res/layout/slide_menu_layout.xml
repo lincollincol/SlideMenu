@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/motionLayout"
-    app:layoutDescription="@xml/scene_slide_menu_start"
+    app:layoutDescription="@xml/motion_scene_slide_menu"
     app:applyMotionScene="true"
     app:motionDebug="SHOW_ALL">
 

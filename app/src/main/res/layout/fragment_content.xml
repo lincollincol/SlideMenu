@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+
     <TextView
+        android:id="@+id/data_tv"
         android:text="My big data"
         android:layout_gravity="center"
         android:textSize="33sp"

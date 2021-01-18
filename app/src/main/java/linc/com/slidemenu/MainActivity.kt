@@ -21,10 +21,10 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        supportFragmentManager.beginTransaction()
+        /*supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
-            .replace(R.id.slideFragmentContainer, ContentFragment())
-            .commit()
+            .replace(R.id.fragment_view, ContentFragment())
+            .commit()*/
 
         /*slideMenu = SlideMenu.Builder()
             .withContext(this)

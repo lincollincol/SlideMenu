@@ -93,8 +93,7 @@
 
         <!-- Content declaration -->
         <Constraint
-            android:id="@+id/dragView"
-            app:visibilityMode="ignore" >
+            android:id="@+id/dragView">
             <Layout
                 app:layout_constraintWidth_percent="0.7"
                 app:layout_constraintHeight_percent="0.7" />

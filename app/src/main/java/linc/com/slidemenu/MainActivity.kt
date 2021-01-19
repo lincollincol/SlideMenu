@@ -1,10 +1,11 @@
-package linc.com.slidemenu
+ package linc.com.slidemenu
 
 import android.content.res.Configuration
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
+import kotlinx.android.synthetic.main.activity_main.*
 import linc.com.slidemenu.models.CollapseSide
 import linc.com.slidemenu.models.MenuItem
 import linc.com.slidemenu.models.Section
@@ -12,14 +13,23 @@ import linc.com.slidemenu.models.Shadow
 
 class MainActivity : AppCompatActivity() {
 
-//    private lateinit var slideMenu: SlideMenu
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.slide_menu_layout)
         setContentView(R.layout.activity_main)
 
+        slide.shadow = Shadow(Color.BLACK, 0.4f)
+        slide.highlightDrag = true
+        slide.refresh()
 
+
+        btn.setOnClickListener {
+            if(slide.side == CollapseSide.START)
+                slide.side = CollapseSide.END
+            else
+                slide.side = CollapseSide.START
+            slide.radius = if(slide.radius != 100f) 100f else 0f
+            slide.refresh()
+        }
 
         /*supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
@@ -55,9 +65,4 @@ class MainActivity : AppCompatActivity() {
 //        });
     }
 
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-//        slideMenu.handleConfiguration(newConfig)
-    }
 }

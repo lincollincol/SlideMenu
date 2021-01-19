@@ -2,11 +2,11 @@ package linc.com.slidemenu.util
 
 internal object Constants {
     // Attributes
-    internal const val ALPHA = "Alpha"
-    internal const val RADIUS = "Radius"
-    internal const val CARD_COLOR = "CardBackgroundColor"
-    internal const val BACKGROUND_COLOR = "BackgroundColor"
-    internal const val CARD_ELEVATION = "CardElevation"
+    @Deprecated("Use Attribute") internal const val ALPHA = "Alpha"
+    @Deprecated("Use Attribute") internal const val RADIUS = "Radius"
+    @Deprecated("Use Attribute") internal const val CARD_COLOR = "CardBackgroundColor"
+    @Deprecated("Use Attribute") internal const val BACKGROUND_COLOR = "BackgroundColor"
+    @Deprecated("Use Attribute") internal const val CARD_ELEVATION = "CardElevation"
 
     // Default values
 

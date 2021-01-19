@@ -38,22 +38,22 @@ class SlideMenuLayout(
 
     // Menu parameters
     private val menuItems: MutableList<MenuItem> = mutableListOf()
-    private var controllerGravity: Int = Gravity.START
+    var controllerGravity: Int = Gravity.START
     // Content view parameters
-    private var side: CollapseSide = CollapseSide.END
-    private var shadow: Shadow = Shadow.getDefault()
+    var side: CollapseSide = CollapseSide.END
+    var shadow: Shadow = Shadow.getDefault()
     private var dragWidthPercent: Float = 0.03f
     private var dragHeightPercent: Float = 0.4f
-    private var containerElevation: Float = 5f
-    private var opacity: Float = 1f
-    private var radius: Float = 0f
-    private var degreeHorizontal: Float = 0f
-    private var degreeVertical: Float = 0f
-    private var degreeAround: Float = 0f
+    var containerElevation: Float = 5f
+    var opacity: Float = 1f
+    var radius: Float = 0f
+    var degreeHorizontal: Float = 0f
+    var degreeVertical: Float = 0f
+    var degreeAround: Float = 0f
     private var menuTemplateTemplate: MenuTemplate? = null
     // TODO: 10.11.20 separate values to constants
     // Debug params
-    private var highlightDrag: Boolean = false
+    var highlightDrag: Boolean = false
 
     private lateinit var dragView: View
     private lateinit var fragmentContainer: SlideContainerView
@@ -88,10 +88,19 @@ class SlideMenuLayout(
         inflateMenu()
     }
 
+
+    fun refresh() {
+        // Re-constraint layout views according to params
+        rebuildLayout()
+
+        // Apply layout customization
+        applyCustomMenuParameters()
+
+
+    }
+
     private fun inflateMenu() {
-
-        println("INFLATE")
-
+        // TODO: 19.01.21 separate to new fun like "init views"
         // Init parent motion layout and menu views
         dragView = LayoutInflater.from(context).inflate(R.layout.default_slide_drag, null)
         shadowMock = LayoutInflater.from(context).inflate(R.layout.default_slide_shadow, null) as CardView
@@ -378,15 +387,15 @@ class SlideMenuLayout(
                 it.constrainPercentHeight(dragView.id, dragHeightPercent)
                 it.constrainPercentWidth(dragView.id, dragWidthPercent)
                 if(highlightDrag) {
-                    it.setIntValue(dragView.id, Constants.BACKGROUND_COLOR, Color.RED)
-                    it.setFloatValue(dragView.id, Constants.ALPHA, 0.3f)
+                    it.setIntValue(dragView.id, Attribute.BACKGROUND_COLOR, Color.RED)
+                    it.setFloatValue(dragView.id, Attribute.ALPHA, 0.3f)
                 }
             }
         this@SlideMenuLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
                 if(highlightDrag) {
-                    it.setIntValue(dragView.id, Constants.BACKGROUND_COLOR, Color.RED)
-                    it.setFloatValue(dragView.id, Constants.ALPHA, 0.3f)
+                    it.setIntValue(dragView.id, Attribute.BACKGROUND_COLOR, Color.RED)
+                    it.setFloatValue(dragView.id, Attribute.ALPHA, 0.3f)
                 }
             }
     }
@@ -394,36 +403,36 @@ class SlideMenuLayout(
     private fun applyContentCustomization(viewId: Int) {
         this@SlideMenuLayout.getConstraintSet(R.id.weatherElapsed)
             .let {
-                it.setFloatValue(viewId, Constants.CARD_ELEVATION, 1f)
+                it.setFloatValue(viewId, Attribute.CARD_ELEVATION, 1f)
+                it.setFloatValue(viewId, Attribute.RADIUS, 0f)
             }
         this@SlideMenuLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
                 it.setRotationY(viewId, degreeHorizontal)
                 it.setRotationX(viewId, degreeVertical)
                 it.setRotation(viewId, degreeAround) // rotate around center
-                it.setFloatValue(viewId, Constants.RADIUS, radius)
-                it.setFloatValue(viewId, Constants.ALPHA, opacity)
-                it.setFloatValue(viewId, Constants.CARD_ELEVATION, containerElevation)
+                it.setFloatValue(viewId, Attribute.RADIUS, radius)
+                it.setFloatValue(viewId, Attribute.ALPHA, opacity)
+                it.setFloatValue(viewId, Attribute.CARD_ELEVATION, containerElevation)
             }
     }
 
     private fun applyShadowCustomization() {
         this@SlideMenuLayout.getConstraintSet(R.id.weatherElapsed)
             .let {
-                it.setFloatValue(shadowMock.id, Constants.ALPHA, 0f)
-                it.setIntValue(shadowMock.id, Constants.CARD_COLOR, shadow.color)
+                it.setFloatValue(shadowMock.id, Attribute.ALPHA, 0f)
+                it.setIntValue(shadowMock.id, Attribute.CARD_COLOR, shadow.color)
             }
         this@SlideMenuLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
-                it.setFloatValue(shadowMock.id, Constants.ALPHA, shadow.opacity)
-                it.setIntValue(shadowMock.id, Constants.CARD_COLOR, shadow.color)
+                it.setFloatValue(shadowMock.id, Attribute.ALPHA, shadow.opacity)
+                it.setIntValue(shadowMock.id, Attribute.CARD_COLOR, shadow.color)
             }
     }
 
     /**
      * Menu items
      */
-
     private fun addMenuItems() {
         menuItems.forEach {
             when(it.section) {
@@ -512,6 +521,7 @@ class SlideMenuLayout(
             }
         })
     }
+
 
 
 }

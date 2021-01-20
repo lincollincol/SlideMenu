@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Handler
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -66,6 +67,30 @@ class SlideMenuLayout(
     private var hasHeader = false
     private var hasFooter = false
 
+    init {
+
+        val attributes = context.obtainStyledAttributes(attrs, R.styleable.SlideMenuLayout)
+
+        /*
+        println("HIGHLIGHT VIEW = ${attributes.getBoolean(R.styleable.SlideMenuLayout_highlightDrag, false)}")
+        println("SHADOW VIEW = ${attributes.getColor(R.styleable.SlideMenuLayout_shadowColor, -1)}")
+        println("SIDE VIEW = ${attributes.getInt(R.styleable.SlideMenuLayout_collapseSide, -1)}")
+        */
+
+        // TODO: 20.01.21 add attributes validation
+        highlightDrag = attributes.getBoolean(R.styleable.SlideMenuLayout_highlightDrag, false)
+        shadow = Shadow(attributes.getColor(R.styleable.SlideMenuLayout_shadowColor, Color.TRANSPARENT), 1f)
+        side = when (attributes.getInt(R.styleable.SlideMenuLayout_collapseSide, -1)) {
+            1 -> CollapseSide.START
+            else -> CollapseSide.END
+        }
+
+
+
+        attributes.recycle()
+
+    }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         var hasFragmentContainer = false
@@ -84,6 +109,8 @@ class SlideMenuLayout(
         if(fragmentContainer.id != R.id.slideFragmentContainer)
             throw InvalidIdException()
 
+        initSlideContainerAttributes()
+
         // Prepare menu views
         inflateMenu()
     }
@@ -95,8 +122,10 @@ class SlideMenuLayout(
 
         // Apply layout customization
         applyCustomMenuParameters()
+    }
 
-
+    private fun initSlideContainerAttributes() {
+        fragmentContainer.
     }
 
     private fun inflateMenu() {

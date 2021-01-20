@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="NavigationView">
-        <attr format="reference" name="menu"/>
+    <declare-styleable name="SlideMenuLayout">
         <attr format="reference" name="header"/>
         <attr format="reference" name="footer"/>
+        <attr format="color" name="shadowColor"/>
+        <attr format="boolean" name="highlightDrag"/>
+
+        <attr name="collapseSide">
+            <flag name="start" value="1"/>
+            <flag name="end" value="2"/>
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="SlideContainerView">
+        <attr format="integer" name="collapseElevation"/>
+        <attr format="float" name="collapseOpacity"/>
+        <attr format="float" name="collapseCornersRadius"/>
+        <attr format="float" name="rotationHorizontalDegree"/>
+        <attr format="float" name="rotationVerticalDegree"/>
+        <attr format="float" name="rotationAroundDegree"/>
     </declare-styleable>
 
 </resources>

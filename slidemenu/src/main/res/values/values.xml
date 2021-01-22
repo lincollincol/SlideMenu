@@ -4,6 +4,14 @@
     <declare-styleable name="SlideMenuLayout">
         <attr format="reference" name="header"/>
         <attr format="reference" name="footer"/>
+
+        <attr format="float" name="collapseElevation"/>
+        <attr format="float" name="collapseOpacity"/>
+        <attr format="float" name="collapseCornersRadius"/>
+        <attr format="float" name="rotationHorizontalDegree"/>
+        <attr format="float" name="rotationVerticalDegree"/>
+        <attr format="float" name="rotationAroundDegree"/>
+
         <attr format="color" name="shadowColor"/>
         <attr format="boolean" name="highlightDrag"/>
 
@@ -13,13 +21,5 @@
         </attr>
     </declare-styleable>
 
-    <declare-styleable name="SlideContainerView">
-        <attr format="integer" name="collapseElevation"/>
-        <attr format="float" name="collapseOpacity"/>
-        <attr format="float" name="collapseCornersRadius"/>
-        <attr format="float" name="rotationHorizontalDegree"/>
-        <attr format="float" name="rotationVerticalDegree"/>
-        <attr format="float" name="rotationAroundDegree"/>
-    </declare-styleable>
 
 </resources>

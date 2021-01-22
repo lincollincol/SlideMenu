@@ -41,16 +41,18 @@ class SlideMenuLayout(
     private val menuItems: MutableList<MenuItem> = mutableListOf()
     var controllerGravity: Int = Gravity.START
     // Content view parameters
-    var side: CollapseSide = CollapseSide.END
-    var shadow: Shadow = Shadow.getDefault()
     private var dragWidthPercent: Float = 0.03f
     private var dragHeightPercent: Float = 0.4f
-    var containerElevation: Float = 5f
-    var opacity: Float = 1f
-    var radius: Float = 0f
-    var degreeHorizontal: Float = 0f
-    var degreeVertical: Float = 0f
-    var degreeAround: Float = 0f
+
+    var side: CollapseSide
+    var shadow: Shadow
+    var containerElevation: Float
+    var opacity: Float
+    var radius: Float
+    var degreeHorizontal: Float
+    var degreeVertical: Float
+    var degreeAround: Float
+
     private var menuTemplateTemplate: MenuTemplate? = null
     // TODO: 10.11.20 separate values to constants
     // Debug params
@@ -71,12 +73,6 @@ class SlideMenuLayout(
 
         val attributes = context.obtainStyledAttributes(attrs, R.styleable.SlideMenuLayout)
 
-        /*
-        println("HIGHLIGHT VIEW = ${attributes.getBoolean(R.styleable.SlideMenuLayout_highlightDrag, false)}")
-        println("SHADOW VIEW = ${attributes.getColor(R.styleable.SlideMenuLayout_shadowColor, -1)}")
-        println("SIDE VIEW = ${attributes.getInt(R.styleable.SlideMenuLayout_collapseSide, -1)}")
-        */
-
         // TODO: 20.01.21 add attributes validation
         highlightDrag = attributes.getBoolean(R.styleable.SlideMenuLayout_highlightDrag, false)
         shadow = Shadow(attributes.getColor(R.styleable.SlideMenuLayout_shadowColor, Color.TRANSPARENT), 1f)
@@ -85,6 +81,12 @@ class SlideMenuLayout(
             else -> CollapseSide.END
         }
 
+        containerElevation = attributes.getFloat(R.styleable.SlideMenuLayout_collapseElevation, 5f)
+        opacity = attributes.getFloat(R.styleable.SlideMenuLayout_collapseOpacity, 1f)
+        radius = attributes.getFloat(R.styleable.SlideMenuLayout_collapseCornersRadius, 0f)
+        degreeHorizontal = attributes.getFloat(R.styleable.SlideMenuLayout_rotationHorizontalDegree, 0f)
+        degreeVertical = attributes.getFloat(R.styleable.SlideMenuLayout_rotationVerticalDegree, 0f)
+        degreeAround = attributes.getFloat(R.styleable.SlideMenuLayout_rotationAroundDegree, 0f)
 
 
         attributes.recycle()
@@ -109,12 +111,9 @@ class SlideMenuLayout(
         if(fragmentContainer.id != R.id.slideFragmentContainer)
             throw InvalidIdException()
 
-        initSlideContainerAttributes()
-
         // Prepare menu views
         inflateMenu()
     }
-
 
     fun refresh() {
         // Re-constraint layout views according to params
@@ -122,10 +121,6 @@ class SlideMenuLayout(
 
         // Apply layout customization
         applyCustomMenuParameters()
-    }
-
-    private fun initSlideContainerAttributes() {
-        fragmentContainer.
     }
 
     private fun inflateMenu() {
@@ -422,6 +417,15 @@ class SlideMenuLayout(
             }
         this@SlideMenuLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
+                it.setRotationY(dragView.id, degreeHorizontal)
+                it.setRotationX(dragView.id, degreeVertical)
+                it.setRotation(dragView.id, 45f)
+
+                println(degreeHorizontal)
+                println(degreeVertical)
+                println(degreeAround)
+
+
                 if(highlightDrag) {
                     it.setIntValue(dragView.id, Attribute.BACKGROUND_COLOR, Color.RED)
                     it.setFloatValue(dragView.id, Attribute.ALPHA, 0.3f)
@@ -434,12 +438,13 @@ class SlideMenuLayout(
             .let {
                 it.setFloatValue(viewId, Attribute.CARD_ELEVATION, 1f)
                 it.setFloatValue(viewId, Attribute.RADIUS, 0f)
+                it.setFloatValue(viewId, Attribute.ALPHA, 1f)
             }
         this@SlideMenuLayout.getConstraintSet(R.id.weatherCollapsed)
             .let {
                 it.setRotationY(viewId, degreeHorizontal)
                 it.setRotationX(viewId, degreeVertical)
-                it.setRotation(viewId, degreeAround) // rotate around center
+                it.setRotation(viewId, degreeAround)
                 it.setFloatValue(viewId, Attribute.RADIUS, radius)
                 it.setFloatValue(viewId, Attribute.ALPHA, opacity)
                 it.setFloatValue(viewId, Attribute.CARD_ELEVATION, containerElevation)

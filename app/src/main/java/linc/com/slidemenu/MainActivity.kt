@@ -17,9 +17,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        slide.shadow = Shadow(Color.BLACK, 0.4f)
-        slide.highlightDrag = true
-        slide.refresh()
+//        slide.shadow = Shadow(Color.BLACK, 0.4f)
+//        slide.highlightDrag = false
+//        slide.refresh()
 
 
         btn.setOnClickListener {
@@ -31,10 +31,10 @@ class MainActivity : AppCompatActivity() {
             slide.refresh()
         }
 
-        /*supportFragmentManager.beginTransaction()
+        supportFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
-            .replace(R.id.fragment_view, ContentFragment())
-            .commit()*/
+            .replace(R.id.slideFragmentContainer, ContentFragment())
+            .commit()
 
         /*slideMenu = SlideMenu.Builder()
             .withContext(this)

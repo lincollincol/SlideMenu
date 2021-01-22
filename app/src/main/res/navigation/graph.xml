@@ -3,9 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/graph"
-    app:startDestination="@id/contentFragment">
+    >
+<!--
+app:startDestination="@id/contentFragment"
+-->
 
-    <fragment
+    <!--<fragment
         android:id="@+id/contentFragment"
         android:name="linc.com.slidemenu.ContentFragment"
         android:label="ContentFragment"
@@ -18,6 +21,6 @@
         android:id="@+id/fragment2"
         android:name="linc.com.slidemenu.Fragment2"
         android:label="fragment_2"
-        tools:layout="@layout/fragment_2" />
+        tools:layout="@layout/fragment_2" />-->
 
 </navigation>

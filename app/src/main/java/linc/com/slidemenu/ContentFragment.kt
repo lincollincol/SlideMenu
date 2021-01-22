@@ -21,7 +21,7 @@ class ContentFragment : Fragment(R.layout.fragment_content) {
 //            Navigation.findNavController(view).navigate(R.id.fragment2)
             Navigation.createNavigateOnClickListener(R.id.action_contentFragment_to_fragment2).onClick(view)
         }*/
-        data_tv.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.action_contentFragment_to_fragment2))
+//        data_tv.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.action_contentFragment_to_fragment2))
 
 
     }

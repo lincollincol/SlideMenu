@@ -7,15 +7,29 @@
 
     android:id="@+id/slide"
 
-    app:highlightDrag="true"
+    app:highlightDrag="false"
     app:collapseSide="start"
-    app:shadowColor="#000000"
+    app:shadowColor="#68FFEB3B"
+
+    app:collapseCornersRadius="100"
+    app:collapseElevation="1"
+    app:collapseOpacity="0.1"
+
+    app:rotationAroundDegree="0"
+    app:rotationHorizontalDegree="-15"
+    app:rotationVerticalDegree="0"
+
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutDescription="@xml/motion_scene_slide_menu"
     app:applyMotionScene="true"
     tools:context=".MainActivity">
+
+    <!--
+        app:rotationVerticalDegree="45"
+    app:rotationAroundDegree="45"
+    -->
 
     <Button
         android:id="@+id/btn"
@@ -34,29 +48,29 @@
         android:id="@+id/slideFragmentContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-
-        app:collapseCornersRadius="100"
-        app:collapseElevation="10"
-        app:collapseOpacity="0.5"
-
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-        app:rotationAroundDegree="45"
-        app:rotationHorizontalDegree="45"
-        app:rotationVerticalDegree="45"
-        >
+<!--    <linc.com.slidemenu.SlideContainerView
+        android:id="@+id/slideFragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/fragment_view"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:elevation="1dp"
             app:defaultNavHost="true"
             app:navGraph="@navigation/graph" />
 
-    </linc.com.slidemenu.SlideContainerView>
+    </linc.com.slidemenu.SlideContainerView>-->
 
 </linc.com.slidemenu.SlideMenuLayout>
